@@ -25,5 +25,5 @@ mongoose
 
 //Conexión al puerto
 app.listen(port, () => {
-    
+    console.log(port)
 });

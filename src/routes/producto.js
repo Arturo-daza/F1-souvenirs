@@ -12,5 +12,46 @@ router.post("/producto", (req, res) => {
 
 //Obtener todos los productos
 router.get("/producto", (req, res) => {
+    productoSchema.find()
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
 })
+
+// consult by catgory
+router.get("/categoria/:categoria", (req, res) => {
+    const { categoria } = req.params;
+    productoSchema.find({categoria: categoria})
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
+});
+
+// consult by id
+router.get("/:id", (req, res) => {
+    const { id } = req.params;
+    productoSchema.findById(id)
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
+});
+
+
+// Ruta para actualizar una producto por su ID
+router.put('/producto/:id', (req, res) => {
+    const {id} = req.params; 
+    const {nombre, descripcion, precio, imagen, categoria} = req.body
+    productoSchema.updateOne({_id: id}, {
+        $set  : {pelicula, genero, director, año}
+    })
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
+});
+
+//Eliminar un producto por su id
+router.delete("/producto/:id", (req, res) => {
+    const {id} = req.params; 
+    productoSchema
+    .findByIdAndDelete(id)
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
+}); 
+
 module.exports = router;
