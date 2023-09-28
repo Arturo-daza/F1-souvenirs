@@ -69,11 +69,11 @@ router.get('/cart', async (req, res) => {
 });
 
 // Actualizar la cantidad de producto del carrito de compras
-router.put('/cart/update-quantity/:idCart/:itemId', async (req, res) => {
+router.put('/cart/update-quantity/:idCart/:userId', async (req, res) => {
   try {
-    const { idCart, itemId } = req.params;
+    const { idCart, userId } = req.params;
     const { quantity } = req.body;
-    const cart = await Cart.findById(idCart);
+    const cart = await Cart.findOne({ user: userId });
     const item = cart.items.find(item => item._id.equals(itemId));
     item.quantity = quantity;
     await cart.save();
