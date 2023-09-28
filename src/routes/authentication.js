@@ -9,7 +9,7 @@ router.post("/signup", async (req, res) => {
         email: email,
         pass: pass,
     });
-    user1.pass = await user.encryptpass(user.pass);
+    user1.pass = await user1.encryptpass(user1.pass);
     await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
     res.json({
         message: "user guardado.",
@@ -35,4 +35,39 @@ router.post("/login", async (req, res) => {
         data: "Bienvenido(a)",
       });
     });
+
+//conseguir todos los ususarios
+router.get("/users", async (req, res) => {
+    const users = await userSchema.find();
+    res.json(users);
+});
+
+//conseguir un usuario
+router.get("/users/:id", async (req, res) => {
+    const user = await userSchema.findById(req.params.id);
+    res.json(user);
+});
+
+//actualizar un usuario
+router.put('/updateUser',async function updateUser(req ,res){
+    const {id, user, email, pass} = req.body;
+    const user1 = new userSchema({
+        user: user,
+        email: email,
+        pass: pass,
+    });
+    user1.pass = await user1.encryptpass(user1.pass);
+    await userSchema.findByIdAndUpdate(id, user1);
+    res.json({
+        message: "user actualizado.",
+    });
+})
+// Eliminar un usuario
+router.delete("/deleteUser/:id", async (req, res) => {
+    await userSchema.findByIdAndDelete(req.params.id);
+    res.json({
+        message: "user eliminado.",
+    });
+});
+
 module.exports = router;
