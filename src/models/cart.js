@@ -3,18 +3,14 @@ const mongoose = require("mongoose");
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Producto", // Nombre del modelo de producto relacionado
+    ref: "product", // Nombre del modelo de producto relacionado
     required: true,
   },
   quantity: {
     type: Number,
     required: true,
     min: 1, // La cantidad mínima debe ser 1
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
+  }
 });
 // pendiente definir el esquema del user
 const cartSchema = new mongoose.Schema({
