@@ -37,9 +37,9 @@ router.get("/product/:id", (req, res) => {
 // Ruta para actualizar una product por su ID
 router.put('/product/:id', (req, res) => {
     const {id} = req.params; 
-    const {nombre, descripcion, precio, imagen, categoria} = req.body
-    productSchema.updateOne({_id: id}, {
-        $set  : {nombre, descripcion, precio, imagen, categoria}
+    const {nombre, descripcion, precio, imagen, vendedor, categoria} = req.body
+    Product.updateOne({_id: id}, {
+        $set  : {nombre, descripcion, precio, imagen, vendedor, categoria}
     })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));

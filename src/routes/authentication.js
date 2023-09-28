@@ -3,11 +3,12 @@ const bcrypt = require("bcrypt")
 const router = express.Router(); //manejador de rutas de express
 const userSchema = require("../models/user");
 router.post("/signup", async (req, res) => {
-    const { user, email, pass } = req.body;
+    const { user, email, pass, type } = req.body;
     const user1 = new userSchema({
         user: user,
         email: email,
         pass: pass,
+        type: type
     });
     user1.pass = await user1.encryptpass(user1.pass);
     await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
@@ -48,26 +49,40 @@ router.get("/users/:id", async (req, res) => {
     res.json(user);
 });
 
-//actualizar un usuario
-router.put('/updateUser',async function updateUser(req ,res){
-    const {id, user, email, pass} = req.body;
-    const user1 = new userSchema({
-        user: user,
-        email: email,
-        pass: pass,
-    });
-    user1.pass = await user1.encryptpass(user1.pass);
-    await userSchema.findByIdAndUpdate(id, user1);
-    res.json({
-        message: "user actualizado.",
-    });
+router.put('/users/:id', async function updateUser(req ,res){
+    const { user, email, pass, type } = req.body;
+    const user1 = await userSchema.findById(req.params.id); // find the user by id
+
+    if(user1) {
+        user1.user = user;
+        user1.email = email;
+        user1.pass = await user1.encryptpass(pass);
+        user1.type = type;
+
+        await user1.save(); //save the updated user
+
+        res.json({
+            message: "user actualizado.",
+        });
+    } else {
+        res.status(404).json({
+            message: "user no encontrado.",
+        });
+    }
 })
+
 // Eliminar un usuario
-router.delete("/deleteUser/:id", async (req, res) => {
+router.delete("/user/:id", async (req, res) => {
     await userSchema.findByIdAndDelete(req.params.id);
     res.json({
         message: "user eliminado.",
     });
+});
+
+// Conseguir usuarios por type
+router.get("/users/type/:type", async (req, res) => {
+    const user = await userSchema.find({ type: req.params.type });
+    res.json(user);
 });
 
 module.exports = router;

@@ -13,6 +13,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  type: {
+    type: String,
+    required: true,
+  }
 });
 userSchema.methods.encryptpass = async (pass) => {
   const salt = await bcrypt.genSalt(10);
