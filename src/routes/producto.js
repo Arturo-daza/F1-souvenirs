@@ -17,7 +17,7 @@ router.get("/producto", (req, res) => {
         .catch((error) => res.json({ message: error }));
 })
 
-// consult by catgory
+// consult by category
 router.get("/categoria/:categoria", (req, res) => {
     const { categoria } = req.params;
     productoSchema.find({categoria: categoria})
@@ -26,7 +26,7 @@ router.get("/categoria/:categoria", (req, res) => {
 });
 
 // consult by id
-router.get("/:id", (req, res) => {
+router.get("/producto/:id", (req, res) => {
     const { id } = req.params;
     productoSchema.findById(id)
     .then((data) => res.json(data))
@@ -39,7 +39,7 @@ router.put('/producto/:id', (req, res) => {
     const {id} = req.params; 
     const {nombre, descripcion, precio, imagen, categoria} = req.body
     productoSchema.updateOne({_id: id}, {
-        $set  : {pelicula, genero, director, año}
+        $set  : {nombre, descripcion, precio, imagen, categoria}
     })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
