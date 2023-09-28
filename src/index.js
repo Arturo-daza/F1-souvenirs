@@ -2,6 +2,7 @@ const parser = require("body-parser");
 const express = require("express");
 const app = express();
 const port = 3000;
+const authRoutes = require("./routes/authentication")
 const productRoutes = require("./routes/product");
 const cartRoutes = require("./routes/cart");
 const mongoose = require("mongoose");
@@ -13,6 +14,7 @@ app.use(parser.json()); // transforma los datos a formato JSON
 
 
 //Gestión de las rutas usando el middleware
+app.use("/api", authRoutes)
 app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
 app.use(express.json());
