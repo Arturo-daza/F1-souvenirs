@@ -3,18 +3,25 @@ const bcrypt = require("bcrypt")
 const router = express.Router(); //manejador de rutas de express
 const userSchema = require("../models/user");
 router.post("/signup", async (req, res) => {
-    const { user, email, pass, type } = req.body;
-    const user1 = new userSchema({
-        user: user,
-        email: email,
-        pass: pass,
-        type: type
-    });
-    user1.pass = await user1.encryptpass(user1.pass);
-    await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
-    res.json({
-        message: "user guardado.",
-    });
+    try {
+        const { user, email, pass, type } = req.body;
+        const user1 = new userSchema({
+            user: user,
+            email: email,
+            pass: pass,
+            type: type
+        });
+        user1.pass = await user1.encryptpass(user1.pass);
+        await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
+        res.json({
+            message: "user guardado.",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error al guardar el usuario."
+        });
+    }
 });
 
 //inicio de sesión
@@ -38,18 +45,18 @@ router.post("/login", async (req, res) => {
     });
 
 //conseguir todos los ususarios
-router.get("/users", async (req, res) => {
+router.get("/user", async (req, res) => {
     const users = await userSchema.find();
     res.json(users);
 });
 
 //conseguir un usuario
-router.get("/users/:id", async (req, res) => {
+router.get("/user/:id", async (req, res) => {
     const user = await userSchema.findById(req.params.id);
     res.json(user);
 });
 
-router.put('/users/:id', async function updateUser(req ,res){
+router.put('/user/:id', async function updateUser(req ,res){
     const { user, email, pass, type } = req.body;
     const user1 = await userSchema.findById(req.params.id); // find the user by id
 
@@ -80,7 +87,7 @@ router.delete("/user/:id", async (req, res) => {
 });
 
 // Conseguir usuarios por type
-router.get("/users/type/:type", async (req, res) => {
+router.get("/user/type/:type", async (req, res) => {
     const user = await userSchema.find({ type: req.params.type });
     res.json(user);
 });

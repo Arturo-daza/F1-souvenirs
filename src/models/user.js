@@ -15,8 +15,9 @@ const userSchema = mongoose.Schema({
   },
   type: {
     type: String,
+    enum: ["Vendedor", "Comprador", "Admin"],
     required: true,
-  }
+  },
 });
 userSchema.methods.encryptpass = async (pass) => {
   const salt = await bcrypt.genSalt(10);

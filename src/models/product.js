@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
     nombre: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         trim: true, // Elimina espacios en blanco al principio y al final
     },
@@ -33,6 +33,15 @@ const productSchema = new mongoose.Schema({
     },
     });
 
-const product = mongoose.model("Products", productSchema);
+const product = mongoose.model("Product", productSchema);
 
 module.exports = product;
+// genera el  el endpoint post para ingresar nuevo producto 
+// genera el endpoint get para obtener todos los productos
+// genera el endpoint get para obtener un producto por id
+// genera el endpoint put para actualizar un producto por id
+// genera el endpoint delete para eliminar un producto por id
+// genera el endpoint get para obtener todos los productos por categoria
+// genera el endpoint get para obtener todos los productos por vendedor
+// genera el endpoint get para obtener todos los productos por fecha de creacion
+

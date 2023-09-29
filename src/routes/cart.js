@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Cart = require('../models/cart');
+const Product= require("../models/product")
 
 // Agregar un producto al carrito
 router.post('/cart/add', async (req, res) => {
@@ -13,6 +14,14 @@ router.post('/cart/add', async (req, res) => {
     if (!cart) {
       // Si el usuario no tiene un carrito, crear uno nuevo
       cart = new Cart({ user, items: [] });
+    }
+
+    // Verificar si el producto existe
+    const existingProduct = await Product.findOne({ _id: product });
+    
+    if (!existingProduct) {
+      // Si el producto no existe, devolver un error
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     // Verificar si el producto ya está en el carrito
@@ -38,7 +47,8 @@ router.post('/cart/add', async (req, res) => {
 router.get('/cart/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-    const cart = await Cart.findOne({ user: userId }).populate('items.product');
+    const cart = await Cart.findOne({ user: userId }).populate('user').populate('items.product');
+    console.log(cart)
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,10 +78,10 @@ router.get('/cart', async (req, res) => {
   }
 });
 
-// Actualizar la cantidad de producto del carrito de compras
-router.put('/cart/update-quantity/:idCart/:userId', async (req, res) => {
+// Actualizar la cantidad de producto in cart, pide userid y itemid
+router.put('/cart/:userId/:itemId', async (req, res) => {
   try {
-    const { idCart, userId } = req.params;
+    const { userId, itemId } = req.params;
     const { quantity } = req.body;
     const cart = await Cart.findOne({ user: userId });
     const item = cart.items.find(item => item._id.equals(itemId));
@@ -81,6 +91,19 @@ router.put('/cart/update-quantity/:idCart/:userId', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-})
+});
 
+
+
+
+// Eliminar carrito de compras
+router.delete('/cart/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Cart.findByIdAndDelete(id);
+    res.json({ message: 'Cart deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 module.exports= router
