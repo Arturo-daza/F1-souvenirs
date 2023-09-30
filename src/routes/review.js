@@ -30,4 +30,35 @@ router.get('/review', async (req, res) => {
     res.send(review);
 });
 
+// Endpoint para obtener una revisión por id
+router.get('/review/:id', async (req, res) => {
+    const review = await reviewSchema.findById(req.params.id).populate('user', 'user').populate('product', 'nombre');
+    if (!review) return res.status(404).send('Review not exits');
+    res.send(review);
+});
+// Endpoint PUT
+router.put('/review/:id', async (req, res) => {
+    const { user, product, rating, comment } = req.body;
+    const newReview = { user, product, rating, comment };
+    const review = await reviewSchema.findByIdAndUpdate(req.params.id, newReview, {
+        new: true,
+    });
+    if (!review) return res.status(404).send('Review not exits');
+    res.status(204).send("Review Updated");
+});
+
+// Endpoint DELETE
+router.delete('/review/:id', async (req, res) => {
+    const review = await reviewSchema.findByIdAndDelete(req.params.id);
+    if (!review) return res.status(404).send('Review not exits');
+    res.status(200).send('Review deleted');
+});
+
+// Endpoint get for userid
+router.get('/review/user/:id', async (req, res) => {
+    const review = await reviewSchema.find({ user: req.params.id }).populate('user', 'user').populate('product', 'nombre');
+    if (!review) return res.status(404).send('Review not exits');
+    res.send(review);
+});
+
 module.exports = router;
