@@ -5,7 +5,7 @@ const port = 3000;
 const authRoutes = require("./routes/authentication")
 const productRoutes = require("./routes/product");
 const cartRoutes = require("./routes/cart");
-const ReviewRoutes = require('../routes/review');
+const ReviewRoutes = require('./routes/review');
 const mongoose = require("mongoose");
 
 
