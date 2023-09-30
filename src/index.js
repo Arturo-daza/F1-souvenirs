@@ -5,7 +5,8 @@ const port = 3000;
 const authRoutes = require("./routes/authentication")
 const productRoutes = require("./routes/product");
 const cartRoutes = require("./routes/cart");
-const ReviewRoutes = require('./routes/review');
+const reviewRoutes = require('./routes/review');
+const orderRoutes = require('./routes/order');
 const mongoose = require("mongoose");
 
 
@@ -18,7 +19,8 @@ app.use(parser.json()); // transforma los datos a formato JSON
 app.use("/api", authRoutes)
 app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
-app.use("/api", ReviewRoutes);
+app.use("/api", reviewRoutes);
+app.use("/api", orderRoutes);
 app.use(express.json());
 
 

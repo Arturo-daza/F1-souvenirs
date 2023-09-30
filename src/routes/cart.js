@@ -48,7 +48,6 @@ router.get('/cart/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     const cart = await Cart.findOne({ user: userId }).populate('user').populate('items.product');
-    console.log(cart)
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
