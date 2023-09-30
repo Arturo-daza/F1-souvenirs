@@ -88,4 +88,12 @@ router.delete("/product/:id", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
+// endpoint get for vendedor id
+router.get("/product/vendedor/:id", (req, res) => {
+    const { id } = req.params;
+    productSchema
+        .find({ vendedor: id })
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
+});
 module.exports = router;
