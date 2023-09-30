@@ -61,4 +61,12 @@ router.get('/review/user/:id', async (req, res) => {
     res.send(review);
 });
 
+
+// Endpoint get for product id
+router.get('/review/product/:id', async (req, res) => {
+    const review = await reviewSchema.find({ product: req.params.id }).populate('user', 'user').populate('product', 'nombre');
+    if (!review) return res.status(404).send('Review not exits');
+    res.send(review);
+});
+
 module.exports = router;
