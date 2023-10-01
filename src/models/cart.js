@@ -1,5 +1,39 @@
 const mongoose = require("mongoose");
+/**
+ * @swagger
+ *components:
+ *  schemas:
+ *    CartItem:
+ *      type: object
+ *      properties:
+ *        product:
+ *          type: string
+ *          description: The ID of the related product
+ *        quantity:
+ *          type: integer
+ *          description: The quantity of the product in the cart
+ *          minimum: 1
+ *      required:
+ *        - product
+ *        - quantity
+ *
+ *    Cart:
+ *      type: object
+ *      properties:
+ *        user:
+ *          type: string
+ *          description: The ID of the related user
+ *        items:
+ *          type: array
+ *          description: An array of cart items
+ *          items:
+ *            $ref: '#/components/schemas/CartItem'
+ *      required:
+ *        - user
+ *        - items
+ *
 
+ */
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,

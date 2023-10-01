@@ -28,7 +28,7 @@ const swaggerSpec={
                 }
             ]
         },
-        apis:["./src/routes/*.js"]
+        apis:["./src/routes/*.js", "./src/models/*.js"]
         
 }
 

@@ -1,4 +1,45 @@
 const mongoose = require("mongoose");
+/**
+* @swagger
+* components:
+*   schemas:
+*     Product:
+*       type: object
+*       properties:
+*         nombre:
+*           type: string
+*           description: The name of the product
+*         descripcion:
+*           type: string
+*           description: The description of the product
+*         precio:
+*           type: number
+*           format: double
+*           description: The price of the product
+*         imagen:
+*           type: string
+*           format: uri
+*           description: The URL of the product image
+*         vendedor:
+*           type: string
+*           description: The ID of the seller
+*         categoria:
+*           type: string
+*           description: The category of the product
+*         fechaCreacion:
+*           type: string
+*           format: date-time
+*           description: The creation date of the product
+*       required:
+*         - nombre
+*         - descripcion
+*         - precio
+*         - imagen
+*         - vendedor
+*         - categoria
+*         - fechaCreacion
+ */
+
 
 const productSchema = new mongoose.Schema({
     nombre: {
@@ -36,12 +77,3 @@ const productSchema = new mongoose.Schema({
 const product = mongoose.model("Product", productSchema);
 
 module.exports = product;
-// genera el  el endpoint post para ingresar nuevo producto 
-// genera el endpoint get para obtener todos los productos
-// genera el endpoint get para obtener un producto por id
-// genera el endpoint put para actualizar un producto por id
-// genera el endpoint delete para eliminar un producto por id
-// genera el endpoint get para obtener todos los productos por categoria
-// genera el endpoint get para obtener todos los productos por vendedor
-// genera el endpoint get para obtener todos los productos por fecha de creacion
-

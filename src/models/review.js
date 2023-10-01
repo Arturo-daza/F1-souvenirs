@@ -1,5 +1,30 @@
 const mongoose = require('mongoose');
+/**
+ * @swagger
+* components:
+*   schemas:
+*     Review:
+*       type: object
+*       properties:
+*         user:
+*           type: string
+*           description: The ID of the user who created the review
+*         product:
+*           type: string
+*           description: The ID of the product being reviewed
+*         rating:
+*           type: number
+*           description: The rating given by the user (1-5)
+*         comment:
+*           type: string
+*           description: The comment or review text
+*       required:
+*         - user
+*         - product
+*         - rating
+*         - comment
 
+ */
 const reviewSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,

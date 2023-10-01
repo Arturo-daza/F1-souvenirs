@@ -4,40 +4,7 @@ const router = express.Router(); //manejador de rutas de express
 const userSchema = require("../models/user");
 
 // creawte user
-/**
- * @swagger
- * components:
- *  schemas:
- *      User:
- *          type: object
- *          properties:
- *              user:
- *                  type: string
- *                  description: The username of the user
- *              email:
- *                  type: string
- *                  description: The email of the user
- *              pass:
- *                  type: string
- *                  description: The password of the user
- *              type:
- *                  type: string
- *                  enum:
- *                      - Vendedor
- *                      - Comprador
- *                      - Admin
- *                  description: The type of user (e.g., Vendedor, Comprador, Admin)
- *          required:
- *              - user
- *              - email
- *              - pass
- *              - type
- *          example:
- *              user: JohnDoe
- *              email: johndoe@example.com
- *              pass: password123
- *              type: Vendedor
- */
+
 
 //registro de usuarios
 /**
