@@ -7,6 +7,33 @@ const productRoutes = require("./routes/product");
 const cartRoutes = require("./routes/cart");
 const reviewRoutes = require('./routes/review');
 const orderRoutes = require('./routes/order');
+// swagger
+const swaggerUI= require("swagger-ui-express")
+const swaggerJsDoc = require("swagger-jsdoc")
+const swaggerSpec={
+    definition:{
+        openapi:"3.0.0",
+        info:{
+            title:"API de la tienda",
+            version:"1.0.0",
+            description:"API de la tienda para el proyecto de la asignatura de Ingeniería del Software 2",
+            contact:{
+                name:"Arturo daza",
+                email:"arturodaza@gmail.com"
+                }
+            },
+            servers:[
+                {
+                    url:"http://localhost:3000"
+                }
+            ]
+        },
+        apis:["./src/routes/*.js"]
+        
+}
+
+
+// Mongo db
 const mongoose = require("mongoose");
 
 
@@ -21,6 +48,7 @@ app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api", orderRoutes);
+app.use("/api-doc", swaggerUI.serve, swaggerUI.setup(swaggerJsDoc(swaggerSpec)))
 app.use(express.json());
 
 
@@ -33,5 +61,5 @@ mongoose
 
 //Conexión al puerto
 app.listen(port, () => {
-    console.log(port)
+    console.log(`🛒 server listening on port ${port}`)
 });

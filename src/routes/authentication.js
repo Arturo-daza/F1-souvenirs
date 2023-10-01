@@ -2,6 +2,83 @@ const express = require("express");
 const bcrypt = require("bcrypt")
 const router = express.Router(); //manejador de rutas de express
 const userSchema = require("../models/user");
+
+// creawte user
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *      User:
+ *          type: object
+ *          properties:
+ *              user:
+ *                  type: string
+ *                  description: The username of the user
+ *              email:
+ *                  type: string
+ *                  description: The email of the user
+ *              pass:
+ *                  type: string
+ *                  description: The password of the user
+ *              type:
+ *                  type: string
+ *                  enum:
+ *                      - Vendedor
+ *                      - Comprador
+ *                      - Admin
+ *                  description: The type of user (e.g., Vendedor, Comprador, Admin)
+ *          required:
+ *              - user
+ *              - email
+ *              - pass
+ *              - type
+ *          example:
+ *              user: JohnDoe
+ *              email: johndoe@example.com
+ *              pass: password123
+ *              type: Vendedor
+ */
+
+//registro de usuarios
+/**
+ * @swagger
+ * /api/signup:
+ *       post:
+ *           summary: Endpoint for signing up a new user
+ *           tags: [User]
+ *           requestBody:
+ *               required: true
+ *               content:
+ *                    application/json:
+ *                        schema:
+ *                            type: object
+ *                            $ref: '#/components/schemas/User'
+ *           responses:
+ *               200:
+ *                   description: User successfully saved
+ *                   content:
+ *                       application/json:
+ *                             schema:
+ *                                 type: object
+ *                                 properties:
+ *                                 message:
+ *                                     type: string
+ *                                     description: Success message for saving the user
+ *                             example:
+ *                                 message: User saved.
+ *               500:
+ *                   description: Error saving the user
+ *                   content:
+ *                       application/json:
+ *                            schema:
+ *                                type: object
+ *                                properties:
+ *                                message:
+ *                                    type: string
+ *                                    description: Error message for saving the user
+ *                            example:
+ *                                message: Error saving the user.
+ */
 router.post("/signup", async (req, res) => {
     try {
         const { user, email, pass, type } = req.body;
