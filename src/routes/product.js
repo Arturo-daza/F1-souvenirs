@@ -3,40 +3,68 @@ const router = express.Router(); //manejador de rutas de express
 const User = require('../models/user'); // Importa el modelo User
 const productSchema = require("../models/product.js");
 //Nuevo product
-router.post("/product", async (req, res) => {
-    try {
-        // Obtén los datos del producto del cuerpo de la solicitud (req.body)
-        const { nombre, descripcion, precio, imagen, vendedor, categoria } =
-        req.body;
 
-        // Verifica si el vendedor existe en la base de datos
-        const vendedorExistente = await User.findById(vendedor);
+/**
+ * @swagger
+ * /api/product:
+ *    post:
+ *       tags: [Product]
+ *       summary: Create a new product
+ *       requestBody:
+ *           required: true
+ *           content:
+ *               application/json:
+ *                   schema:
+ *                       $ref: '#/components/schemas/Product'
+ *       responses:
+ *           '200':
+ *              description: Product created successfully
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Product'
+ *               
+ *           '400':
+ *               description: Invalid request parameters
+ *           '500':
+ *               description: Internal server error
+ */
+router.post("/product", (req, res) => {
+    // Obtén los datos del producto del cuerpo de la solicitud (req.body)
+    const { nombre, descripcion, precio, imagen, vendedor, categoria } = req.body;
 
-        if (!vendedorExistente) {
-        return res
-            .status(400)
-            .json({ error: "El vendedor no existe en el sistema." });
-        }
+    // Verifica si el vendedor existe en la base de datos
+    User.findById(vendedor)
+        .then((vendedorExistente) => {
+            if (!vendedorExistente) {
+                return res.status(400).json({ error: "El vendedor no existe en el sistema." });
+            }
 
-        // Crea una nueva instancia de Product
-        const nuevoProducto = new productSchema({
-        nombre,
-        descripcion,
-        precio,
-        imagen,
-        vendedor,
-        categoria,
+            // Crea una nueva instancia de Product
+            const nuevoProducto = new productSchema({
+                nombre,
+                descripcion,
+                precio,
+                imagen,
+                vendedor,
+                categoria,
+            });
+
+            // Guarda el producto en la base de datos
+            nuevoProducto.save()
+                .then((productoGuardado) => {
+                    // Respuesta exitosa
+                    res.status(200).json(productoGuardado);
+                })
+                .catch((error) => {
+                    // Manejo de errores
+                    res.status(400).json({ error: error.message });
+                });
+        })
+        .catch((error) => {
+            // Manejo de errores
+            res.status(400).json({ error: error.message });
         });
-
-        // Guarda el producto en la base de datos
-        const productoGuardado = await nuevoProducto.save();
-
-        // Respuesta exitosa
-        res.status(201).json(productoGuardado);
-    } catch (error) {
-        // Manejo de errores
-        res.status(400).json({ error: error.message });
-    }
 });
 
 //Obtener todos los products
