@@ -1,7 +1,8 @@
 const parser = require("body-parser");
 const express = require("express");
 const app = express();
-const port = 3000;
+const cors = require("cors");
+const port = 4000;
 const authRoutes = require("./routes/authentication")
 const productRoutes = require("./routes/product");
 const cartRoutes = require("./routes/cart");
@@ -35,6 +36,12 @@ const swaggerSpec={
 
 // Mongo db
 const mongoose = require("mongoose");
+app.use(
+    cors({
+        credentials: true,
+        origin: 'http://localhost:5173',
+    })
+);
 
 
 require("dotenv").config();
