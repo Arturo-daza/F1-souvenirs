@@ -35,35 +35,38 @@ const mongoose = require('mongoose');
  *        - items
  *        - totalAmount
  */
-const orderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema(
+  {
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     items: [
-        {
+      {
         product: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product', 
-            required: true,
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
         },
         quantity: {
-            type: Number,
-            required: true,
-            min: 1,
+          type: Number,
+          required: true,
+          min: 1,
         },
-    }
+      },
     ],
     totalAmount: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     orderDate: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
-});
+  },
+  { timestamps: true }
+);
 
 const Order = mongoose.model('Order', orderSchema);
 
