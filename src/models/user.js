@@ -36,7 +36,7 @@ const bcrypt = require('bcrypt'); // importando el componente bcrypt
  */
 const userSchema = mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
       required: true,
       trim: true,
