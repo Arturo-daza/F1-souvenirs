@@ -3,17 +3,15 @@ const mongoose = require('mongoose');
 /**
  * @swagger
  * components:
- * schemas:
- *  Category:
- *   type: object
- *  properties:
- *   name:
- *   type: string
- *  description: The name of the category
- * required:
- * - name
- * example:
- * name: Ropa
+ *   schemas:
+ *     Category:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the category
+ *       required:
+ *       - name
  */
 
 const categorySchema = new mongoose.Schema(
