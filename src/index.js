@@ -8,6 +8,7 @@ const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart');
 const reviewRoutes = require('./routes/review');
 const orderRoutes = require('./routes/order');
+const categoryRoutes = require('./routes/category');
 // swagger
 const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -52,6 +53,7 @@ app.use('/api', productRoutes);
 app.use('/api', cartRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', orderRoutes);
+app.use('/api', categoryRoutes);
 app.use(
   '/api-doc',
   swaggerUI.serve,
