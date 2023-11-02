@@ -2,6 +2,7 @@ const parser = require('body-parser');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const morgan = require('morgan');
 const port = 4000;
 const authRoutes = require('./routes/authentication');
 const productRoutes = require('./routes/product');
@@ -43,6 +44,7 @@ app.use(
   })
 );
 
+app.use(morgan("dev"));
 require('dotenv').config();
 app.use(parser.urlencoded({ extended: false })); //permite leer los datos que vienen en la petición
 app.use(parser.json()); // transforma los datos a formato JSON
