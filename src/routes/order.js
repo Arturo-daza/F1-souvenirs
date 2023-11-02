@@ -4,7 +4,7 @@ const cartSchema = require('../models/cart');
 const orderSchema = require('../models/order'); 
 
 // Ruta para que los compradores realicen un pedido desde su carrito
-router.post("/carrito/realizar-pedido", async (req, res) => {
+router.post("/cart/order-checkout", async (req, res) => {
     const { userId } = req.body; // Suponiendo que el usuario actual está autenticado y su ID se pasa en el cuerpo de la solicitud
     try {
         // Buscar el carrito del usuario
