@@ -34,29 +34,37 @@ const bcrypt = require('bcrypt'); // importando el componente bcrypt
  *              pass: password123
  *              type: Vendedor
  */
-const userSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const userSchema = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ['Vendedor', 'Comprador', 'Admin'],
+      required: true,
+    },
   },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ['Vendedor', 'Comprador', 'Admin'],
-    required: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.methods.encryptpass = async (pass) => {
   const salt = await bcrypt.genSalt(10);
