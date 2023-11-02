@@ -47,9 +47,9 @@ const userSchema = require('../models/user');
  */
 router.post('/signup', async (req, res) => {
   try {
-    const { name, lastName, email, password, type } = req.body;
+    const { firstName, lastName, email, password, type } = req.body;
     const user1 = new userSchema({
-      name: name,
+      firstName: firstName,
       lastName: lastName,
       email: email,
       password: password,
@@ -58,7 +58,7 @@ router.post('/signup', async (req, res) => {
     user1.password = await user1.encryptpass(user1.password);
     await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
     res.status(201).json({
-      message: 'user guardado.',
+      message: 'Usuario guardado.',
     });
   } catch (error) {
     console.error(error);
@@ -75,10 +75,10 @@ router.post('/login', async (req, res) => {
   if (error) return res.status(400).json({ error: error.details[0].message }); //Buscando el user por su dirección de email
   const user = await userSchema.findOne({ email: req.body.email });
   //validando si no se encuentra
-  if (!user) return res.status(400).json({ error: 'user no encontrado' }); //Transformando la contraseña a su valor original para //compararla con la password que se ingresa en el inicio de sesión
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' }); //Transformando la contraseña a su valor original para //compararla con la password que se ingresa en el inicio de sesión
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword)
-    return res.status(400).json({ error: 'password no válida' });
+    return res.status(401).json({ error: 'Contraseña no válida' });
   res.json({
     error: null,
     data: 'Bienvenido(a)',
