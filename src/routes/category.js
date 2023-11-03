@@ -19,7 +19,7 @@ router.get('/categories/:id', getCategory, async (req, res) => {
     const category = structuredClone(res.category.toObject());
     const products = await Product.find({ category: req.params.id });
     category.products = products;
-    res.json(category);
+    res.status(201).json(category);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -50,7 +50,7 @@ router.get('/categories-top', async (req, res) => {
     categories.splice(categories.indexOf(maxCategory), 1);
   }
 
-  res.json(topCategories);
+  res.status(201).json(topCategories);
 });
 
 // Crear una categoría
