@@ -14,8 +14,45 @@ router.get('/categories', async (req, res) => {
 });
 
 // Obtener una categoría
-router.get('/categories/:id', getCategory, (req, res) => {
-  res.json(res.category);
+router.get('/categories/:id', getCategory, async (req, res) => {
+  try {
+    const category = structuredClone(res.category.toObject());
+    const products = await Product.find({ category: req.params.id });
+    category.products = products;
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Obtener tres las tres categorías con más productos
+router.get('/categories-top', async (req, res) => {
+
+  const categories = await Category.find();
+  const topCategories = [];
+
+  for (let i = 0; i < 3; i++) {
+    let maxProducts = 0;
+    let maxCategory = null;
+    let response = null;
+    for (let j = 0; j < categories.length; j++) {
+      const category = categories[j];
+      const products = await Product.find({ category: category._id }).limit(10);
+      if (products.length > maxProducts) {
+        maxProducts = products.length;
+        maxCategory = category;
+        response = {
+          ...category.toObject(),
+          products: products
+        }
+      }
+    }
+    topCategories.push(response);
+    categories.splice(categories.indexOf(maxCategory), 1);
+  }
+
+  res.json(topCategories);
+
 });
 
 // Crear una categoría
@@ -52,16 +89,6 @@ router.delete('/categories/:id', getCategory, async (req, res) => {
   try {
     await res.category.remove();
     res.json({ message: 'Category deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Obtener todos los productos de una categoría
-router.get('/categories/:id/products', getCategory, async (req, res) => {
-  try {
-    const products = await Product.find({ category: req.params.id });
-    res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
