@@ -27,7 +27,6 @@ router.get('/categories/:id', getCategory, async (req, res) => {
 
 // Obtener tres las tres categorías con más productos
 router.get('/categories-top', async (req, res) => {
-
   const categories = await Category.find();
   const topCategories = [];
 
@@ -43,8 +42,8 @@ router.get('/categories-top', async (req, res) => {
         maxCategory = category;
         response = {
           ...category.toObject(),
-          products: products
-        }
+          products: products,
+        };
       }
     }
     topCategories.push(response);
@@ -52,7 +51,6 @@ router.get('/categories-top', async (req, res) => {
   }
 
   res.json(topCategories);
-
 });
 
 // Crear una categoría
