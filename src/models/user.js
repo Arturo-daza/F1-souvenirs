@@ -41,6 +41,13 @@ const bcrypt = require('bcrypt'); // importando el componente bcrypt
  *                      - Admin
  *                  description: The type of user (e.g., Vendedor, Comprador, Admin)
  *                  required: true
+ *          required:
+ *              - firstName
+ *              - lastName
+ *              - user
+ *              - email
+ *              - pass
+ *              - type 
  *          example:
  *              firstName: John
  *              lastName: Doe

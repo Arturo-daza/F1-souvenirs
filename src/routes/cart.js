@@ -3,12 +3,16 @@ const router = express.Router();
 const Cart = require('../models/cart');
 const Product = require('../models/product');
 const verifyToken = require("./validate_token")
+const userSchema = require("../models/user");
+
 
 
 // Agregar un producto al carrito
 router.post('/cart/add', verifyToken, async (req, res) => {
+  const userData = await userSchema.findById(req.userData.id);
+  user = req.userData.id
   try {
-    const { user, product, quantity } = req.body;
+    const { product, quantity } = req.body;
 
     // Verificar si el usuario ya tiene un carrito
     let cart = await Cart.findOne({ user });
@@ -46,18 +50,35 @@ router.post('/cart/add', verifyToken, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+// Obtener el carro del que este login 
+router.get('/cart/user', verifyToken,async (req, res) => {
 
-// Obtener el carrito de compras de un usuario
-router.get('/cart/:userId', verifyToken,async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.userData.id;
     const cart = await Cart.findOne({ user: userId })
-      .populate('user')
       .populate('items.product');
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+
+// Obtener el carrito de compras de un usuario
+router.get('/cart/:userId', verifyToken,async (req, res) => {
+  const userData = await userSchema.findById(req.userData.id);
+  if(userData.type==="Admin"){
+    try {
+      const userId = req.params.userId;
+      const cart = await Cart.findOne({ user: userId })
+        .populate('user')
+        .populate('items.product');
+      res.json(cart);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }} else {
+      res.status(401).json({message: "No cumples con los permisos para hacer esta acción "})
+    }
 });
 
 // Eliminar un producto del carrito

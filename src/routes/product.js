@@ -1,48 +1,82 @@
 const express = require('express');
 const router = express.Router(); //manejador de rutas de express
-const User = require('../models/user'); // Importa el modelo User
+const userSchema = require("../models/user");
 const productSchema = require('../models/product.js');
+const categorySchema = require('../models/category')
 const verifyToken = require("./validate_token")
 
 //Nuevo product
-router.post('/products', verifyToken,  (req, res) => {
-  // Obtén los datos del producto del cuerpo de la solicitud (req.body)
-  const { name, description, price, image, seller, category } = req.body;
+/**
+ * @swagger
+ * paths:
+ *   /product:
+ *     post:
+ *       tags: [Product]
+ *       summary: Create a new product
+ *       parameters:
+ *         - in: header
+ *           name: access-token
+ *           description: The token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/definitions/Product'
+ *             example:
+ *               name: "Laptop"
+ *               description: "A portable computer"
+ *               price: 1000
+ *               image: "https://example.com/laptop.jpg"
+ *               seller: "5f9a1c3b8a1e2c0017f6a8b2"
+ *               category: "Electronics"
+ *       responses:
+ *         '201':
+ *           description: Product created successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/definitions/Product'
+ *               example:
+ *                 _id: "5f9a1c3b8a1e2c0017f6a8b3"
+ *                 name: "Laptop"
+ *                 description: "A portable computer"
+ *                 price: 1000
+ *                 image: "https://example.com/laptop.jpg"
+ *                 seller: "5f9a1c3b8a1e2c0017f6a8b2"
+ *                 category: "Electronics"
+ *                 __v: 0
+ *         '400':
+ *           description: Invalid request parameters
+ *         '500':
+ *           description: Internal server error
+ */
 
-  // Verifica si el seller existe en la base de datos
-  User.findById(seller)
-    .then((vendedorExistente) => {
-      if (!vendedorExistente) {
-        return res
-          .status(400)
-          .json({ error: 'El seller no existe en el sistema.' });
-      }
+router.post('/products', verifyToken, async (req, res) => {
+  try {
+    const { name, description, price, image, categoryName } = req.body;
+    const user = await userSchema.findById(req.userData.id);
+    const seller = user.id;
 
-      // Crea una nueva instancia de Product
-      const nuevoProducto = new productSchema({
-        name,
-        description,
-        price,
-        image,
-        seller,
-        category,
-      });
+    const categoryObj = await categorySchema.findOne({ name: categoryName });
+    const category = categoryObj.id;
 
-      // Guarda el producto en la base de datos
-      nuevoProducto.save()
-        .then((productoGuardado) => {
-          // Respuesta exitosa
-          res.status(201).json(productoGuardado);
-        })
-        .catch((error) => {
-          // Manejo de errores
-          res.status(400).json({ error: error.message });
-        });
-    })
-    .catch((error) => {
-      // Manejo de errores
-      res.status(400).json({ error: error.message });
+    const nuevoProducto = new productSchema({
+      name,
+      description,
+      price,
+      image,
+      seller,
+      category,
     });
+
+    const productoGuardado = await nuevoProducto.save();
+    res.status(201).json(productoGuardado);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 //Obtener todos los products
@@ -63,22 +97,34 @@ router.get('/products/:id', (req, res) => {
 });
 
 // Ruta para actualizar una product por su ID
-router.put('/products/:id', verifyToken, (req, res) => {
+router.put('/products/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, image, seller, category } = req.body;
-  productSchema
-    .updateOne(
-      { _id: id },
-      {
-        $set: { name, description, price, image, seller, category },
-      }
-    )
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
+  const { name, description, price, image, categoryName } = req.body;
+  const user = await userSchema.findById(req.userData.id);
+  const seller = user.id;
+
+  try {
+    const categoryObj = await categorySchema.findOne({ name: categoryName });
+    if (!categoryObj) {
+      throw new Error('Category not found');
+    }
+    const category = categoryObj.id;
+    productSchema
+      .updateOne(
+        { _id: id },
+        {
+          $set: { name, description, price, image, seller, category },
+        }
+      )
+      .then((data) => res.json(data))
+      .catch((error) => res.json({ message: error }));
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 //Eliminar un product por su id
-router.delete('/products/:id',verifyToken, (req, res) => {
+router.delete('/products/:id',verifyToken, async(req, res) => {
   const { id } = req.params;
   productSchema
     .findByIdAndDelete(id)
@@ -87,7 +133,7 @@ router.delete('/products/:id',verifyToken, (req, res) => {
 });
 
 // endpoint get for seller id
-router.get('/products/seller/:id', verifyToken, (req, res) => {
+router.get('/products/seller/:id', (req, res) => {
   const { id } = req.params;
   productSchema
     .find({ seller: id })
