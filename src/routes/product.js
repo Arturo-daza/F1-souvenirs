@@ -46,7 +46,7 @@ router.post('/products', verifyToken,  (req, res) => {
 });
 
 //Obtener todos los products
-router.get('/products', verifyToken,  (req, res) => {
+router.get('/products',  (req, res) => {
   productSchema
     .find()
     .then((data) => res.json(data))
@@ -63,7 +63,7 @@ router.get('/products/:id', (req, res) => {
 });
 
 // Ruta para actualizar una product por su ID
-router.put('/products/:id', (req, res) => {
+router.put('/products/:id', verifyToken, (req, res) => {
   const { id } = req.params;
   const { name, description, price, image, seller, category } = req.body;
   productSchema
@@ -78,7 +78,7 @@ router.put('/products/:id', (req, res) => {
 });
 
 //Eliminar un product por su id
-router.delete('/products/:id', (req, res) => {
+router.delete('/products/:id',verifyToken, (req, res) => {
   const { id } = req.params;
   productSchema
     .findByIdAndDelete(id)
@@ -87,7 +87,7 @@ router.delete('/products/:id', (req, res) => {
 });
 
 // endpoint get for seller id
-router.get('/products/seller/:id', (req, res) => {
+router.get('/products/seller/:id', verifyToken, (req, res) => {
   const { id } = req.params;
   productSchema
     .find({ seller: id })

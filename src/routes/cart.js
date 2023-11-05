@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Cart = require('../models/cart');
 const Product = require('../models/product');
+const verifyToken = require("./validate_token")
+
 
 // Agregar un producto al carrito
-router.post('/cart/add', async (req, res) => {
+router.post('/cart/add', verifyToken, async (req, res) => {
   try {
     const { user, product, quantity } = req.body;
 
@@ -46,7 +48,7 @@ router.post('/cart/add', async (req, res) => {
 });
 
 // Obtener el carrito de compras de un usuario
-router.get('/cart/:userId', async (req, res) => {
+router.get('/cart/:userId', verifyToken,async (req, res) => {
   try {
     const userId = req.params.userId;
     const cart = await Cart.findOne({ user: userId })
@@ -59,7 +61,7 @@ router.get('/cart/:userId', async (req, res) => {
 });
 
 // Eliminar un producto del carrito
-router.delete('/cart/:userId/:productId', async (req, res) => {
+router.delete('/cart/:userId/:productId', verifyToken, async (req, res) => {
   try {
     const { userId, productId } = req.params;
     const cart = await Cart.findOne({ user: userId });
@@ -72,7 +74,7 @@ router.delete('/cart/:userId/:productId', async (req, res) => {
 });
 
 // Obtener todos los carritos de compras
-router.get('/cart', async (req, res) => {
+router.get('/cart', verifyToken, async (req, res) => {
   try {
     const carts = await Cart.find().populate('items.product');
     res.json(carts);
@@ -82,7 +84,7 @@ router.get('/cart', async (req, res) => {
 });
 
 // Actualizar la cantidad de producto in cart, pide userid y itemid
-router.put('/cart/:userId/:itemId', async (req, res) => {
+router.put('/cart/:userId/:itemId', verifyToken, async (req, res) => {
   try {
     const { userId, itemId } = req.params;
     const { quantity } = req.body;
@@ -97,7 +99,7 @@ router.put('/cart/:userId/:itemId', async (req, res) => {
 });
 
 // Eliminar carrito de compras
-router.delete('/cart/:id', async (req, res) => {
+router.delete('/cart/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await Cart.findByIdAndDelete(id);
