@@ -2,45 +2,51 @@ const express = require('express');
 const router = express.Router(); //manejador de rutas de express
 const User = require('../models/user'); // Importa el modelo User
 const productSchema = require('../models/product.js');
+const verifyToken = require("./validate_token")
 
 //Nuevo product
-router.post('/products', async (req, res) => {
-  try {
-    // Obtén los datos del producto del cuerpo de la solicitud (req.body)
-    const { name, description, price, image, seller, category } = req.body;
+router.post('/products', verifyToken,  (req, res) => {
+  // Obtén los datos del producto del cuerpo de la solicitud (req.body)
+  const { name, description, price, image, seller, category } = req.body;
 
-    // Verifica si el seller existe en la base de datos
-    const vendedorExistente = await User.findById(seller);
+  // Verifica si el seller existe en la base de datos
+  User.findById(seller)
+    .then((vendedorExistente) => {
+      if (!vendedorExistente) {
+        return res
+          .status(400)
+          .json({ error: 'El seller no existe en el sistema.' });
+      }
 
-    if (!vendedorExistente) {
-      return res
-        .status(400)
-        .json({ error: 'El seller no existe en el sistema.' });
-    }
+      // Crea una nueva instancia de Product
+      const nuevoProducto = new productSchema({
+        name,
+        description,
+        price,
+        image,
+        seller,
+        category,
+      });
 
-    // Crea una nueva instancia de Product
-    const nuevoProducto = new productSchema({
-      name,
-      description,
-      price,
-      image,
-      seller,
-      category,
+      // Guarda el producto en la base de datos
+      nuevoProducto.save()
+        .then((productoGuardado) => {
+          // Respuesta exitosa
+          res.status(201).json(productoGuardado);
+        })
+        .catch((error) => {
+          // Manejo de errores
+          res.status(400).json({ error: error.message });
+        });
+    })
+    .catch((error) => {
+      // Manejo de errores
+      res.status(400).json({ error: error.message });
     });
-
-    // Guarda el producto en la base de datos
-    const productoGuardado = await nuevoProducto.save();
-
-    // Respuesta exitosa
-    res.status(201).json(productoGuardado);
-  } catch (error) {
-    // Manejo de errores
-    res.status(400).json({ error: error.message });
-  }
 });
 
 //Obtener todos los products
-router.get('/products', (req, res) => {
+router.get('/products', verifyToken,  (req, res) => {
   productSchema
     .find()
     .then((data) => res.json(data))

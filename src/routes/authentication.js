@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router(); //manejador de rutas de express
 const userSchema = require('../models/user');
 
+const jwt = require("jsonwebtoken")
 // creawte user
 
 //registro de usuarios
@@ -45,27 +46,35 @@ const userSchema = require('../models/user');
  *                            example:
  *                                message: Error saving the user.
  */
-router.post('/signup', async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, type } = req.body;
-    const user1 = new userSchema({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: password,
-      type: type,
+router.post('/signup', (req, res) => {
+  const { firstName, lastName, email, password, type } = req.body;
+  const user1 = new userSchema({
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: password,
+    type: type,
+  });
+  user1.encryptpass(user1.password)
+    .then((encryptedPassword) => {
+      user1.password = encryptedPassword;
+      return user1.save();
+    })
+    .then(() => {
+      const token = jwt.sign({id: user1._id}, process.env.SECRET, {
+        expiresIn: 60*60
+      });
+      res.json({
+        auth: true,
+        token, 
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({
+        message: 'Error al guardar el usuario.',
+      });
     });
-    user1.password = await user1.encryptpass(user1.password);
-    await user1.save(); //save es un método de mongoose para guardar datos en MongoDB
-    res.status(201).json({
-      message: 'Usuario guardado.',
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Error al guardar el usuario.',
-    });
-  }
 });
 
 //inicio de sesión

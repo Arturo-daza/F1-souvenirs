@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 /**
  * @swagger
  * components:
@@ -64,12 +64,12 @@ const productSchema = new mongoose.Schema(
     },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Referencia al modelo de Usuario para identificar al seller
+      ref: "User", // Referencia al modelo de Usuario para identificar al seller
       required: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category', // Referencia al modelo de Usuario para identificar al seller
+      ref: "Category", // Referencia al modelo de Usuario para identificar al seller
       required: true,
     },
   },
@@ -78,6 +78,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-const product = mongoose.model('Product', productSchema);
+const product = mongoose.model("Product", productSchema);
 
 module.exports = product;
