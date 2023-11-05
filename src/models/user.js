@@ -1,5 +1,5 @@
-const mongoose = require("mongoose"); // importando el componente mongoose
-const bcrypt = require("bcrypt"); // importando el componente bcrypt
+const mongoose = require('mongoose'); // importando el componente mongoose
+const bcrypt = require('bcrypt'); // importando el componente bcrypt
 /**
  * @swagger
  * components:
@@ -34,27 +34,42 @@ const bcrypt = require("bcrypt"); // importando el componente bcrypt
  *              pass: password123
  *              type: Vendedor
  */
-const userSchema = mongoose.Schema({
-  user: {
-    type: String,
-    required: true,
+const userSchema = mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ['Vendedor', 'Comprador', 'Admin'],
+      required: true,
+    },
   },
-  email: {
-    type: String,
-    required: true,
-  },
-  pass: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ["Vendedor", "Comprador", "Admin"],
-    required: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
+
 userSchema.methods.encryptpass = async (pass) => {
   const salt = await bcrypt.genSalt(10);
-  return bcrypt.hash(pass, salt);
+  const hashedPassword = await bcrypt.hash(pass, salt);
+  return hashedPassword;
 };
-module.exports = mongoose.model("User", userSchema);
+
+module.exports = mongoose.model('User', userSchema);
