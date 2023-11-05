@@ -108,14 +108,30 @@ router.post("/login", async (req, res) => {
 
 //conseguir todos los ususarios
 router.get("/user", verifyToken, async (req, res) => {
-    const users = await userSchema.find();
-    res.json(users);
+    const user = await userSchema.findById(req.userData.id)
+    console.log(user.type)
+    if (user.type === "Admin") {
+        const users = await userSchema.find();
+        res.json({
+          user: user.type,
+          users
+        });
+    } else {
+        res.json({
+          user: user.type
+        });
+    }
 });
 
 //conseguir un usuario
 router.get("/user/:id", verifyToken, async (req, res) => {
-    const user = await userSchema.findById(req.params.id);
-    res.json(user);
+  const user = await userSchema.findById(req.params.id)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(error => {
+      res.status(500).json({ error: error.message });
+    });
 });
 
 router.put('/user/:id', verifyToken, async function updateUser(req ,res){
