@@ -6,7 +6,7 @@ const verifyToken = (req, res, next) => {
   if (!token)
     return res
       .status(401)
-      .json({ error: '!Lo sentimos!, no puedes acceder a esta ruta' });
+      .json({ error: '¡Lo sentimos!, no puedes acceder a esta ruta' });
   try {
     const decoded = jwt.verify(token, process.env.SECRET);
     req.userData = decoded;
