@@ -1,11 +1,11 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
+const express = require('express');
+const bcrypt = require('bcrypt');
 const router = express.Router(); //manejador de rutas de express
-const userSchema = require("../models/user");
+const userSchema = require('../models/user');
 
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-const verifyToken = require("./validate_token");
+const verifyToken = require('./validate_token');
 
 // creawte user
 
@@ -66,8 +66,16 @@ const verifyToken = require("./validate_token");
  *                 value: { "message": "Error al guardar el usuario." }
  *                 summary: A failure response
  */
-router.post("/signup", (req, res) => {
+router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, password, type } = req.body;
+
+  // validate user unique email
+  const user = await userSchema.findOne({ email: email });
+  if (user)
+    return res.status(400).json({
+      message: 'El correo ya está registrado.',
+    });
+
   const user1 = new userSchema({
     firstName: firstName,
     lastName: lastName,
@@ -82,18 +90,14 @@ router.post("/signup", (req, res) => {
       return user1.save();
     })
     .then(() => {
-      const token = jwt.sign({ id: user1._id }, process.env.SECRET, {
-        expiresIn: 60 * 60,
-      });
       res.status(201).json({
-        auth: true,
-        token,
+        message: 'Usuario creado exitosamente.',
       });
     })
     .catch((error) => {
       console.error(error);
-      res.status(500).json({
-        message: "Error al guardar el usuario.",
+      res.status(400).json({
+        message: 'Error al guardar el usuario.',
       });
     });
 });
@@ -167,25 +171,28 @@ router.post("/signup", (req, res) => {
  *                 value: { "error": "password no válida" }
  *                 summary: An invalid password
  */
-router.post("/login", async (req, res) => {
+router.post('/login', async (req, res) => {
   // validaciones
-  const { error } = userSchema.validate(req.body.email, req.body.pass);
-  if (error) return res.status(400).json({ error: error.details[0].message });
+  const { error } = userSchema.validate(req.body.email, req.body.password);
+  if (error) return res.status(400).json({ message: error.details[0].message });
   //Buscando el user por su dirección de email
   const user = await userSchema.findOne({ email: req.body.email });
   //validando si no se encuentra
-  if (!user) return res.status(400).json({ error: "user no encontrado" });
+  if (!user) return res.status(400).json({ message: 'user no encontrado' });
   //Transformando la contraseña a su valor original para
   //compararla con la pass que se ingresa en el inicio de sesión
-  const validPassword = await bcrypt.compare(req.body.pass, user.password);
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+
   if (!validPassword)
-    return res.status(400).json({ error: "password no válida" });
-  const token = jwt.sign({ id: user._id }, process.env.SECRET, {
+    return res.status(400).json({ message: 'password no válida' });
+
+  const token = jwt.sign({ user: user }, process.env.SECRET, {
     expiresIn: 60 * 60,
   });
+
   res.json({
     error: null,
-    data: "Bienvenido(a)",
+    message: 'Bienvenido(a)',
     token,
   });
 });
@@ -242,13 +249,13 @@ router.post("/login", async (req, res) => {
  *               message: Error al obtener los usuarios.
  */
 //conseguir todos los ususarios
-router.get("/user", verifyToken, async (req, res) => {
+router.get('/user', verifyToken, async (req, res) => {
   //verifyToken es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
   try {
     const user = await userSchema.findById(req.userData.id); //Este es el user que esta haciendo la petición, con el cual esta el Token
     console.log(user.type);
     if (user) {
-      if (user.type === "Admin") {
+      if (user.type === 'Admin') {
         const users = await userSchema.find();
         res.json({
           user: user.type,
@@ -262,14 +269,14 @@ router.get("/user", verifyToken, async (req, res) => {
     } else {
       //El token no es válido o el usuario no existe
       res.status(401).json({
-        message: "No tienes permiso para acceder a este endpoint.",
+        message: 'No tienes permiso para acceder a este endpoint.',
       });
     }
   } catch (error) {
     //Ocurrió un error al consultar la base de datos
     console.error(error);
     res.status(500).json({
-      message: "Error al obtener los usuarios.",
+      message: 'Error al obtener los usuarios.',
     });
   }
 });
@@ -335,38 +342,37 @@ router.get("/user", verifyToken, async (req, res) => {
  *               error: Error al obtener el usuario.
  */
 //conseguir un usuario
-router.get("/user/:id", verifyToken, async (req, res) => {
+router.get('/user/:id', verifyToken, async (req, res) => {
   //verifyToken es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
   const userData = await userSchema.findById(req.userData.id);
   try {
     let user;
-    if (userData.type === "Admin") {
+    if (userData.type === 'Admin') {
       user = await userSchema.findById(req.params.id);
-    } else{
+    } else {
       user = await userSchema.findById(req.userData.id);
     }
     if (user) {
       //El usuario existe y se devuelve con el código de estado 200 y el mensaje de éxito
       res.status(200).json({
-        message: "Usuario obtenido con éxito.",
+        message: 'Usuario obtenido con éxito.',
         user: user,
       });
     } else {
       //El usuario no existe y se devuelve el código de estado 404 y el mensaje de error
       res.status(404).json({
-        message: "No se encontró el usuario con el ID especificado.",
+        message: 'No se encontró el usuario con el ID especificado.',
       });
     }
   } catch (error) {
     //Ocurrió un error al consultar la base de datos y se devuelve el código de estado 500 y el mensaje de error
     console.error(error);
     res.status(500).json({
-      message: "Error al obtener el usuario.",
+      message: 'Error al obtener el usuario.',
       error: error.message,
     });
   }
 });
-
 
 /**
  * @swagger
@@ -448,12 +454,12 @@ router.get("/user/:id", verifyToken, async (req, res) => {
  *               error: Error al actualizar el usuario.
  */
 // actualiza un usuario, si es admin puede actualizar a todos, si es otro solo se puede actualizar asi mismo
-router.put("/user/:id", verifyToken, async function updateUser(req, res) {
+router.put('/user/:id', verifyToken, async function updateUser(req, res) {
   const { firstName, lastName, email, password, type } = req.body;
 
   const user = await userSchema.findById(req.userData.id);
   if (user) {
-    if (user.type === "Admin") {
+    if (user.type === 'Admin') {
       const user1 = await userSchema.findById(req.params.id); // find the user by id
       if (user1) {
         user1.firstName = firstName;
@@ -464,11 +470,11 @@ router.put("/user/:id", verifyToken, async function updateUser(req, res) {
         await user1.save(); //save the updated user
 
         res.status(200).json({
-          message: "Usuario actualizado exitosamente.",
+          message: 'Usuario actualizado exitosamente.',
         });
       } else {
         res.status(404).json({
-          message: "Usuario no encontrado.",
+          message: 'Usuario no encontrado.',
         });
       }
     } else if (user.id === req.params.id) {
@@ -479,17 +485,17 @@ router.put("/user/:id", verifyToken, async function updateUser(req, res) {
       user.type = type;
       await user.save(); //save the updated user
       res.status(200).json({
-        message: "Usuario actualizado exitosamente.",
+        message: 'Usuario actualizado exitosamente.',
       });
     } else {
       res.status(401).json({
-        message: "No tienes permiso para acceder a este endpoint.",
+        message: 'No tienes permiso para acceder a este endpoint.',
       });
     }
   } else {
     //El token no es válido o el usuario no existe
     res.status(401).json({
-      message: "No tienes permiso para acceder a este endpoint.",
+      message: 'No tienes permiso para acceder a este endpoint.',
     });
   }
 });
@@ -549,42 +555,44 @@ router.put("/user/:id", verifyToken, async function updateUser(req, res) {
  *               error: Error al eliminar el usuario.
  */
 // Eliminar un usuario
-router.delete("/user/:id", verifyToken, async (req, res) => {
+router.delete('/user/:id', verifyToken, async (req, res) => {
   const user = await userSchema.findById(req.userData.id);
 
   if (user) {
-    if (user.type === "Admin") {
-      await userSchema.findByIdAndDelete(req.params.id)
+    if (user.type === 'Admin') {
+      await userSchema
+        .findByIdAndDelete(req.params.id)
         .then(() => {
           res.json({
-            message: "Usuario eliminado exitosamente.",
+            message: 'Usuario eliminado exitosamente.',
           });
         })
         .catch((err) => {
           res.status(500).json({
-            error: "Error al eliminar el usuario.",
+            error: 'Error al eliminar el usuario.',
           });
         });
     } else if (user.id === req.params.id) {
-      await userSchema.findByIdAndDelete(req.params.id)
+      await userSchema
+        .findByIdAndDelete(req.params.id)
         .then(() => {
           res.json({
-            message: "Usuario eliminado exitosamente.",
+            message: 'Usuario eliminado exitosamente.',
           });
         })
         .catch((err) => {
           res.status(500).json({
-            error: "Error al eliminar el usuario.",
+            error: 'Error al eliminar el usuario.',
           });
         });
     } else {
       res.status(401).json({
-        message: "No tienes permiso para acceder a este endpoint.",
+        message: 'No tienes permiso para acceder a este endpoint.',
       });
     }
   } else {
     res.status(401).json({
-      message: "No tienes permiso para acceder a este endpoint.",
+      message: 'No tienes permiso para acceder a este endpoint.',
     });
   }
 });
