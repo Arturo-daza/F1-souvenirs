@@ -6,16 +6,33 @@ const bcrypt = require('bcrypt'); // importando el componente bcrypt
  *  schemas:
  *      User:
  *          type: object
+ *          description: A user in the system, with a username, email, password, and type.
  *          properties:
+ *              firstName:
+ *                  type: string
+ *                  description: The first name of the user
+ *                  required: true
+ *                  trim: true
+ *              lastName:
+ *                  type: string
+ *                  description: The last name of the user
+ *                  required: true
+ *                  trim: true
  *              user:
  *                  type: string
  *                  description: The username of the user
+ *                  required: true
  *              email:
  *                  type: string
  *                  description: The email of the user
+ *                  required: true
+ *                  unique: true
+ *                  format: email
  *              pass:
  *                  type: string
  *                  description: The password of the user
+ *                  required: true
+ *                  format: password
  *              type:
  *                  type: string
  *                  enum:
@@ -23,12 +40,17 @@ const bcrypt = require('bcrypt'); // importando el componente bcrypt
  *                      - Comprador
  *                      - Admin
  *                  description: The type of user (e.g., Vendedor, Comprador, Admin)
+ *                  required: true
  *          required:
+ *              - firstName
+ *              - lastName
  *              - user
  *              - email
  *              - pass
- *              - type
+ *              - type 
  *          example:
+ *              firstName: John
+ *              lastName: Doe
  *              user: JohnDoe
  *              email: johndoe@example.com
  *              pass: password123

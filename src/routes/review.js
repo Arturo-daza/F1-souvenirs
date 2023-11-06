@@ -3,9 +3,11 @@ const router = express.Router();
 const reviewSchema = require('../models/review');
 const roductSchema = require('../models/product');
 const userSchema = require('../models/user');
+const verifyToken = require("./validate_token")
+
 
 // Endpoint para crear una nueva revisión, con validación de que exista el usuario y el producto
-router.post('/review', async (req, res) => {
+router.post('/review', verifyToken, async (req, res) => {
   const { user, product, rating, comment } = req.body;
   const review = new reviewSchema({ user, product, rating, comment });
   const userExists = await userSchema.findById(user);
@@ -44,7 +46,7 @@ router.get('/review/:id', async (req, res) => {
 });
 
 // Endpoint PUT
-router.put('/review/:id', async (req, res) => {
+router.put('/review/:id', verifyToken, async (req, res) => {
   const { user, product, rating, comment } = req.body;
   const newReview = { user, product, rating, comment };
   const review = await reviewSchema.findByIdAndUpdate(
@@ -59,7 +61,7 @@ router.put('/review/:id', async (req, res) => {
 });
 
 // Endpoint DELETE
-router.delete('/review/:id', async (req, res) => {
+router.delete('/review/:id', verifyToken, async (req, res) => {
   const review = await reviewSchema.findByIdAndDelete(req.params.id);
   if (!review) return res.status(404).send('Review not exits');
   res.status(200).send('Review deleted');
