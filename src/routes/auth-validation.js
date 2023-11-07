@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const verifyToken = (req, res, next) => {
+const auth = (req, res, next) => {
   const token = req.headers['access-token'] || ''; // Get the token from header if present or return an empty string
 
   if (!token)
@@ -12,7 +12,7 @@ const verifyToken = (req, res, next) => {
     req.userData = decoded;
     next();
   } catch (err) {
-    res.status(400).json({ error: 'El token no es valido' });
+    res.status(500).json({ error: 'El token no es valido' });
   }
 };
-module.exports = verifyToken;
+module.exports = auth;
