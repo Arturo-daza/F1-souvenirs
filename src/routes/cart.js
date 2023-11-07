@@ -2,15 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Cart = require('../models/cart');
 const Product = require('../models/product');
-const verifyToken = require("./validate_token")
-const userSchema = require("../models/user");
-
-
+const auth = require('./auth-validation');
+const userSchema = require('../models/user');
 
 // Agregar un producto al carrito
-router.post('/cart/add', verifyToken, async (req, res) => {
+router.post('/cart/add', auth, async (req, res) => {
   const userData = await userSchema.findById(req.userData.id);
-  user = req.userData.id
+  user = req.userData.id;
   try {
     const { product, quantity } = req.body;
 
@@ -50,24 +48,21 @@ router.post('/cart/add', verifyToken, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-// Obtener el carro del que este login 
-router.get('/cart/user', verifyToken,async (req, res) => {
-
+// Obtener el carro del que este login
+router.get('/cart/user', auth, async (req, res) => {
   try {
     const userId = req.userData.id;
-    const cart = await Cart.findOne({ user: userId })
-      .populate('items.product');
+    const cart = await Cart.findOne({ user: userId }).populate('items.product');
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-
 // Obtener el carrito de compras de un usuario
-router.get('/cart/:userId', verifyToken,async (req, res) => {
+router.get('/cart/:userId', auth, async (req, res) => {
   const userData = await userSchema.findById(req.userData.id);
-  if(userData.type==="Admin"){
+  if (userData.type === 'Admin') {
     try {
       const userId = req.params.userId;
       const cart = await Cart.findOne({ user: userId })
@@ -76,13 +71,16 @@ router.get('/cart/:userId', verifyToken,async (req, res) => {
       res.json(cart);
     } catch (error) {
       res.status(500).json({ message: error.message });
-    }} else {
-      res.status(401).json({message: "No cumples con los permisos para hacer esta acción "})
     }
+  } else {
+    res
+      .status(401)
+      .json({ message: 'No cumples con los permisos para hacer esta acción ' });
+  }
 });
 
 // Eliminar un producto del carrito
-router.delete('/cart/:userId/:productId', verifyToken, async (req, res) => {
+router.delete('/cart/:userId/:productId', auth, async (req, res) => {
   try {
     const { userId, productId } = req.params;
     const cart = await Cart.findOne({ user: userId });
@@ -95,7 +93,7 @@ router.delete('/cart/:userId/:productId', verifyToken, async (req, res) => {
 });
 
 // Obtener todos los carritos de compras
-router.get('/cart', verifyToken, async (req, res) => {
+router.get('/cart', auth, async (req, res) => {
   try {
     const carts = await Cart.find().populate('items.product');
     res.json(carts);
@@ -105,7 +103,7 @@ router.get('/cart', verifyToken, async (req, res) => {
 });
 
 // Actualizar la cantidad de producto in cart, pide userid y itemid
-router.put('/cart/:userId/:itemId', verifyToken, async (req, res) => {
+router.put('/cart/:userId/:itemId', auth, async (req, res) => {
   try {
     const { userId, itemId } = req.params;
     const { quantity } = req.body;
@@ -120,7 +118,7 @@ router.put('/cart/:userId/:itemId', verifyToken, async (req, res) => {
 });
 
 // Eliminar carrito de compras
-router.delete('/cart/:id', verifyToken, async (req, res) => {
+router.delete('/cart/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
     await Cart.findByIdAndDelete(id);

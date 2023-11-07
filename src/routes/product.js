@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router(); //manejador de rutas de express
-const userSchema = require("../models/user");
+const userSchema = require('../models/user');
 const productSchema = require('../models/product.js');
-const categorySchema = require('../models/category')
-const verifyToken = require("./validate_token")
+const categorySchema = require('../models/category');
+const auth = require('./auth-validation');
 
 //Nuevo product
 /**
@@ -54,7 +54,7 @@ const verifyToken = require("./validate_token")
  *           description: Internal server error
  */
 
-router.post('/products', verifyToken, async (req, res) => {
+router.post('/products', auth, async (req, res) => {
   try {
     const { name, description, price, image, categoryName } = req.body;
     const user = await userSchema.findById(req.userData.id);
@@ -80,7 +80,7 @@ router.post('/products', verifyToken, async (req, res) => {
 });
 
 //Obtener todos los products
-router.get('/products',  (req, res) => {
+router.get('/products', (req, res) => {
   productSchema
     .find()
     .then((data) => res.json(data))
@@ -97,7 +97,7 @@ router.get('/products/:id', (req, res) => {
 });
 
 // Ruta para actualizar una product por su ID
-router.put('/products/:id', verifyToken, async (req, res) => {
+router.put('/products/:id', auth, async (req, res) => {
   const { id } = req.params;
   const { name, description, price, image, categoryName } = req.body;
   const user = await userSchema.findById(req.userData.id);
@@ -124,7 +124,7 @@ router.put('/products/:id', verifyToken, async (req, res) => {
 });
 
 //Eliminar un product por su id
-router.delete('/products/:id',verifyToken, async(req, res) => {
+router.delete('/products/:id', auth, async (req, res) => {
   const { id } = req.params;
   productSchema
     .findByIdAndDelete(id)

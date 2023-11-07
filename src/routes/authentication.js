@@ -5,9 +5,9 @@ const userSchema = require('../models/user');
 
 const jwt = require('jsonwebtoken');
 
-const verifyToken = require('./validate_token');
+const auth = require('./auth-validation');
 
-// creawte user
+// create user
 
 //registro de usuarios
 /**
@@ -249,8 +249,8 @@ router.post('/login', async (req, res) => {
  *               message: Error al obtener los usuarios.
  */
 //conseguir todos los ususarios
-router.get('/user', verifyToken, async (req, res) => {
-  //verifyToken es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
+router.get('/user', auth, async (req, res) => {
+  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
   try {
     const user = await userSchema.findById(req.userData.id); //Este es el user que esta haciendo la petición, con el cual esta el Token
     console.log(user.type);
@@ -342,8 +342,8 @@ router.get('/user', verifyToken, async (req, res) => {
  *               error: Error al obtener el usuario.
  */
 //conseguir un usuario
-router.get('/user/:id', verifyToken, async (req, res) => {
-  //verifyToken es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
+router.get('/user/:id', auth, async (req, res) => {
+  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
   const userData = await userSchema.findById(req.userData.id);
   try {
     let user;
@@ -454,7 +454,7 @@ router.get('/user/:id', verifyToken, async (req, res) => {
  *               error: Error al actualizar el usuario.
  */
 // actualiza un usuario, si es admin puede actualizar a todos, si es otro solo se puede actualizar asi mismo
-router.put('/user/:id', verifyToken, async function updateUser(req, res) {
+router.put('/user/:id', auth, async function updateUser(req, res) {
   const { firstName, lastName, email, password, type } = req.body;
 
   const user = await userSchema.findById(req.userData.id);
@@ -555,7 +555,7 @@ router.put('/user/:id', verifyToken, async function updateUser(req, res) {
  *               error: Error al eliminar el usuario.
  */
 // Eliminar un usuario
-router.delete('/user/:id', verifyToken, async (req, res) => {
+router.delete('/user/:id', auth, async (req, res) => {
   const user = await userSchema.findById(req.userData.id);
 
   if (user) {
@@ -595,6 +595,28 @@ router.delete('/user/:id', verifyToken, async (req, res) => {
       message: 'No tienes permiso para acceder a este endpoint.',
     });
   }
+});
+
+router.get('/verify', async (req, res) => {
+  const token = req.headers['access-token'] || '';
+  if (!token) return res.send(false);
+
+  jwt.verify(token, process.env.SECRET, async (error, user) => {
+    if (error) return res.sendStatus(401);
+
+    const userFound = await userSchema.findById(user.id);
+    if (!userFound) return res.sendStatus(401);
+
+    return res.json({
+      id: userFound._id,
+      username: userFound.username,
+      email: userFound.email,
+    });
+  });
+});
+
+router.get('/logout', (req, res) => {
+  res.status(200).send({ auth: false, token: null });
 });
 
 module.exports = router;

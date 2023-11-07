@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/category');
 const Product = require('../models/product');
-const verifyToken = require("./validate_token")
-
+const auth = require('./auth-validation');
 
 // Obtener todas las categorías
 router.get('/categories', async (req, res) => {
@@ -56,7 +55,7 @@ router.get('/categories-top', async (req, res) => {
 });
 
 // Crear una categoría
-router.post('/categories', verifyToken,async (req, res) => {
+router.post('/categories', auth, async (req, res) => {
   const category = new Category({
     name: req.body.name,
   });
@@ -71,7 +70,7 @@ router.post('/categories', verifyToken,async (req, res) => {
 
 // Actualizar una categoría
 
-router.patch('/categories/:id', getCategory, verifyToken, async (req, res) => {
+router.patch('/categories/:id', getCategory, auth, async (req, res) => {
   if (req.body.name != null) {
     res.category.name = req.body.name;
   }
@@ -85,7 +84,7 @@ router.patch('/categories/:id', getCategory, verifyToken, async (req, res) => {
 });
 
 // Eliminar una categoría
-router.delete('/categories/:id', getCategory, verifyToken, async (req, res) => {
+router.delete('/categories/:id', getCategory, auth, async (req, res) => {
   try {
     await res.category.remove();
     res.json({ message: 'Category deleted' });
