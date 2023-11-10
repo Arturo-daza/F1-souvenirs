@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
-  const token = req.headers['access-token'] || ''; // Get the token from header if present or return an empty string
+  const token = req.headers.authorization.split(' ')[1] || ''; // Get the token from header if present or return an empty string
 
   if (!token)
     return res
