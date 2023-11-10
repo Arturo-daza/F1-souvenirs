@@ -598,19 +598,21 @@ router.delete('/user/:id', auth, async (req, res) => {
 });
 
 router.get('/verify', async (req, res) => {
-  const token = req.headers['access-token'] || '';
+  const token = req.headers.authorization.split(' ')[1] || '';
   if (!token) return res.send(false);
 
   jwt.verify(token, process.env.SECRET, async (error, user) => {
-    if (error) return res.sendStatus(401);
+    if (error) return res.status(401).json({ error: 'Token no válido' });
 
-    const userFound = await userSchema.findById(user.id);
-    if (!userFound) return res.sendStatus(401);
+    const userFound = await userSchema.findById(user.user._id);
+    if (!userFound) return res.status(401).json({ error: 'Usuario no válido' });
 
     return res.json({
       id: userFound._id,
-      username: userFound.username,
+      firstName: userFound.firstName,
+      lastName: userFound.lastName,
       email: userFound.email,
+      type: userFound.type,
     });
   });
 });
