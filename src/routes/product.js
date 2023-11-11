@@ -100,8 +100,8 @@ router.get('/products/:id', (req, res) => {
 router.put('/products/:id', auth, async (req, res) => {
   const { id } = req.params;
   const { name, description, price, image, categoryName } = req.body;
-  const user = await userSchema.findById(req.userData.id);
-  const seller = user.id;
+  const user = await userSchema.findById(req.userData.user._id);
+  const seller = user._id;
 
   try {
     const categoryObj = await categorySchema.findOne({ name: categoryName });
