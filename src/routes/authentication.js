@@ -455,17 +455,26 @@ router.get('/user/:id', auth, async (req, res) => {
  */
 // actualiza un usuario, si es admin puede actualizar a todos, si es otro solo se puede actualizar asi mismo
 router.put('/user/:id', auth, async function updateUser(req, res) {
-  const { firstName, lastName, email, password, type } = req.body;
+  const { firstName, lastName, email, password, newPassword, type } = req.body;
 
-  const user = await userSchema.findById(req.userData.id);
+  const user = await userSchema.findById(req.userData.user._id);
   if (user) {
+    console.log(password, newPassword);
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res
+        .status(400)
+        .json({ message: 'La contraseña ingresada no es válida' });
+    }
+
     if (user.type === 'Admin') {
       const user1 = await userSchema.findById(req.params.id); // find the user by id
       if (user1) {
         user1.firstName = firstName;
         user1.lastName = lastName;
         user1.email = email;
-        user1.password = await user1.encryptpass(password);
+        user1.password = await user1.encryptpass(newPassword);
         user1.type = type;
         await user1.save(); //save the updated user
 
@@ -481,7 +490,7 @@ router.put('/user/:id', auth, async function updateUser(req, res) {
       user.firstName = firstName;
       user.lastName = lastName;
       user.email = email;
-      user.password = await user.encryptpass(password);
+      user.password = await user.encryptpass(newPassword);
       user.type = type;
       await user.save(); //save the updated user
       res.status(200).json({
