@@ -57,7 +57,7 @@ const auth = require('./auth-validation');
 router.post('/products', auth, async (req, res) => {
   try {
     const { name, description, price, image, categoryName } = req.body;
-    const user = await userSchema.findById(req.userData.id);
+    const user = await userSchema.findById(req.userData.user._id);
     const seller = user.id;
 
     const categoryObj = await categorySchema.findOne({ name: categoryName });
