@@ -133,10 +133,9 @@ router.delete('/products/:id', auth, async (req, res) => {
 });
 
 // endpoint get for seller id
-router.get('/products/seller/:id', (req, res) => {
-  const { id } = req.params;
+router.get('/products-by-seller', auth, (req, res) => {
   productSchema
-    .find({ seller: id })
+    .find({ seller: req.userData.user._id })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
