@@ -56,12 +56,11 @@ const auth = require('./auth-validation');
 
 router.post('/products', auth, async (req, res) => {
   try {
-    const { name, description, price, image, categoryName } = req.body;
+    const { name, description, price, image, category } = req.body;
     const user = await userSchema.findById(req.userData.user._id);
     const seller = user.id;
 
-    const categoryObj = await categorySchema.findOne({ name: categoryName });
-    const category = categoryObj.id;
+    const categoryObj = await categorySchema.findOne({ _id: category });
 
     const nuevoProducto = new productSchema({
       name,
@@ -69,7 +68,7 @@ router.post('/products', auth, async (req, res) => {
       price,
       image,
       seller,
-      category,
+      category: categoryObj.id,
     });
 
     const productoGuardado = await nuevoProducto.save();
@@ -99,21 +98,32 @@ router.get('/products/:id', (req, res) => {
 // Ruta para actualizar una product por su ID
 router.put('/products/:id', auth, async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, image, categoryName } = req.body;
+  const { name, description, price, image, category } = req.body;
   const user = await userSchema.findById(req.userData.user._id);
   const seller = user._id;
 
+  const product = await productSchema.findById(id);
+  if (!product.seller.equals(seller)) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
   try {
-    const categoryObj = await categorySchema.findOne({ name: categoryName });
+    const categoryObj = await categorySchema.findOne({ _id: category });
     if (!categoryObj) {
       throw new Error('Category not found');
     }
-    const category = categoryObj.id;
     productSchema
       .updateOne(
         { _id: id },
         {
-          $set: { name, description, price, image, seller, category },
+          $set: {
+            name,
+            description,
+            price,
+            image,
+            seller,
+            category: categoryObj.id,
+          },
         }
       )
       .then((data) => res.json(data))
