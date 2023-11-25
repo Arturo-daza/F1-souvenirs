@@ -110,7 +110,7 @@ router.put('/products/:id', auth, async (req, res) => {
   try {
     const categoryObj = await categorySchema.findOne({ _id: category });
     if (!categoryObj) {
-      throw new Error('Category not found');
+      throw new Error('Categoria no encontrada');
     }
     productSchema
       .updateOne(
