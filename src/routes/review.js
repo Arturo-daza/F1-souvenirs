@@ -40,7 +40,7 @@ router.get('/review/:id', async (req, res) => {
     .findById(req.params.id)
     .populate('user', 'user')
     .populate('product', 'nombre');
-  if (!review) return res.status(404).send('Review not exits');
+  if (!review) return res.status(404).send('Review not exists');
   res.send(review);
 });
 
@@ -55,14 +55,14 @@ router.put('/review/:id', auth, async (req, res) => {
       new: true,
     }
   );
-  if (!review) return res.status(404).send('Review not exits');
+  if (!review) return res.status(404).send('Review not exists');
   res.status(204).send('Review Updated');
 });
 
 // Endpoint DELETE
 router.delete('/review/:id', auth, async (req, res) => {
   const review = await reviewSchema.findByIdAndDelete(req.params.id);
-  if (!review) return res.status(404).send('Review not exits');
+  if (!review) return res.status(404).send('Review not exists');
   res.status(200).send('Review deleted');
 });
 
@@ -72,7 +72,7 @@ router.get('/review/user/:id', async (req, res) => {
     .find({ user: req.params.id })
     .populate('user', 'user')
     .populate('product', 'nombre');
-  if (!review) return res.status(404).send('Review not exits');
+  if (!review) return res.status(404).send('Review not exists');
   res.send(review);
 });
 
@@ -82,7 +82,7 @@ router.get('/review/product/:id', async (req, res) => {
     .find({ product: req.params.id })
     .populate('user', 'user')
     .populate('product', 'nombre');
-  if (!review) return res.status(404).send('Review not exits');
+  if (!review) return res.status(404).send('Review not exists');
   res.send(review);
 });
 
