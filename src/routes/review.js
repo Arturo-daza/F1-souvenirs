@@ -80,7 +80,7 @@ router.get('/review/user/:id', async (req, res) => {
 router.get('/review/product/:id', async (req, res) => {
   const review = await reviewSchema
     .find({ product: req.params.id })
-    .populate('user', 'user')
+    .populate('user', 'firstName lastName')
     .populate('product', 'nombre');
   if (!review) return res.status(404).send('Review not exists');
   res.send(review);
