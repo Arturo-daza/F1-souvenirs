@@ -252,7 +252,7 @@ router.post('/login', async (req, res) => {
 router.get('/user', auth, async (req, res) => {
   //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
   try {
-    const user = await userSchema.findById(req.userData.id); //Este es el user que esta haciendo la petición, con el cual esta el Token
+    const user = await userSchema.findById(req.userData.user._id); //Este es el user que esta haciendo la petición, con el cual esta el Token
     console.log(user.type);
     if (user) {
       if (user.type === 'Admin') {
@@ -344,13 +344,13 @@ router.get('/user', auth, async (req, res) => {
 //conseguir un usuario
 router.get('/user/:id', auth, async (req, res) => {
   //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
-  const userData = await userSchema.findById(req.userData.id);
+  const userData = await userSchema.findById(req.userData.user._id);
   try {
     let user;
     if (userData.type === 'Admin') {
       user = await userSchema.findById(req.params.id);
     } else {
-      user = await userSchema.findById(req.userData.id);
+      user = await userSchema.findById(req.userData.user._id);
     }
     if (user) {
       //El usuario existe y se devuelve con el código de estado 200 y el mensaje de éxito
@@ -565,7 +565,7 @@ router.put('/user/:id', auth, async function updateUser(req, res) {
  */
 // Eliminar un usuario
 router.delete('/user/:id', auth, async (req, res) => {
-  const user = await userSchema.findById(req.userData.id);
+  const user = await userSchema.findById(req.userData.user._id);
 
   if (user) {
     if (user.type === 'Admin') {
