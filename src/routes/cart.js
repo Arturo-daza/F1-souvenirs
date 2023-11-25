@@ -7,7 +7,7 @@ const userSchema = require('../models/user');
 
 // Agregar un producto al carrito
 router.post('/cart/add', auth, async (req, res) => {
-  const userData = await userSchema.findById(req.userData.id);
+  const userData = await userSchema.findById(req.userData.user._id);
   user = req.userData.id;
   try {
     const { product, quantity } = req.body;
@@ -61,7 +61,7 @@ router.get('/cart/user', auth, async (req, res) => {
 
 // Obtener el carrito de compras de un usuario
 router.get('/cart/:userId', auth, async (req, res) => {
-  const userData = await userSchema.findById(req.userData.id);
+  const userData = await userSchema.findById(req.userData.user._id);
   if (userData.type === 'Admin') {
     try {
       const userId = req.params.userId;
