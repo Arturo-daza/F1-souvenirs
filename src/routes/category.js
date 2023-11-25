@@ -22,7 +22,7 @@ router.get('/categories/:id', getCategory, async (req, res) => {
     category.products = products;
     res.status(201).json(category);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(404).json({ message: 'Categoria no encontrada' });
   }
 });
 
@@ -100,10 +100,10 @@ async function getCategory(req, res, next) {
   try {
     category = await Category.findById(req.params.id);
     if (category == null) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: 'Categoria no encontrada' });
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(404).json({ message: 'Categoria no encontrada' });
   }
 
   res.category = category;
