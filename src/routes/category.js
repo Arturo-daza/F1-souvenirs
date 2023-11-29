@@ -111,3 +111,202 @@ async function getCategory(req, res, next) {
 }
 
 module.exports = router;
+/**
+ * @swagger
+ * paths:
+ *   /api/categories:
+ *     get:
+ *       tags: [Category]
+ *       summary: Get all categories
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved all categories
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Category'
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/categories/{id}:
+ *     get:
+ *       tags: [Category]
+ *       summary: Get a specific category with its associated products
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the category to retrieve
+ *           required: true
+ *           schema:
+ *             type: string
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the category with associated products
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     description: The name of the category
+ *                   products:
+ *                     type: array
+ *                     description: An array of products associated with the category
+ *                     items:
+ *                       $ref: '#/components/schemas/Product'
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/categories-top:
+ *     get:
+ *       tags: [Category]
+ *       summary: Get the top three categories with the most products
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the top three categories with the most products
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: The name of the category
+ *                     products:
+ *                       type: array
+ *                       description: An array of products associated with the category
+ *                       items:
+ *                         $ref: '#/components/schemas/Product'
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/categories:
+ *     post:
+ *       tags: [Category]
+ *       summary: Create a new category
+ *       parameters:
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: The name of the category
+ *               required:
+ *                 - name
+ *       responses:
+ *         '201':
+ *           description: Category created successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Category'
+ *         '400':
+ *           description: Invalid request parameters
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/categories/{id}:
+ *     put:
+ *       tags: [Category]
+ *       summary: Update a category
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the category to update
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: The updated name of the category
+ *               required:
+ *                 - name
+ *       responses:
+ *         '200':
+ *           description: Category updated successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Category'
+ *         '400':
+ *           description: Invalid request parameters
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/categories/{id}:
+ *     delete:
+ *       tags: [Category]
+ *       summary: Delete a category
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the category to delete
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Category deleted successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *         '500':
+ *           description: Internal server error
+ */

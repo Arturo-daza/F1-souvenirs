@@ -20,10 +20,10 @@ const swaggerSpec = {
       title: 'API de la tienda',
       version: '1.0.0',
       description:
-        'API de la tienda para el proyecto de la asignatura de Ingeniería del Software 2',
+        'API de marketplace de la F1',
       contact: {
-        name: 'Arturo daza',
-        email: 'arturodaza@gmail.com',
+        name: 'AJJ',
+        email: 'NTD@AJJ.com',
       },
     },
     servers: [

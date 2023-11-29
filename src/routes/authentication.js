@@ -10,62 +10,7 @@ const auth = require('./auth-validation');
 // create user
 
 //registro de usuarios
-/**
- * @swagger
- * /api/signup:
- *   post:
- *     summary: Endpoint for signing up a new user
- *     description: This endpoint creates a new user in the database and returns a JSON Web Token (JWT) for authentication. The request body must contain the user's first name, last name, email, password, and type (admin or regular).
- *     tags: [User]
- *     security:
- *       - jwt: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             $ref: '#/components/schemas/User'
- *           examples:
- *             valid:
- *               value: { "firstName": "John", "lastName": "Doe", "email": "john.doe@example.com", "password": "123456", "type": "regular" }
- *               summary: A valid request
- *             invalid:
- *               value: { "firstName": "John", "lastName": "Doe", "email": "john.doe@example.com", "password": "123456" }
- *               summary: An invalid request (missing type)
- *     responses:
- *       201:
- *         description: User successfully created and assigned a token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 auth:
- *                   type: boolean
- *                   description: A flag indicating if the authentication was successful
- *                 token:
- *                   type: string
- *                   description: The JWT for the user
- *             examples:
- *               success:
- *                 value: { "auth": true, "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwZjQyMjE2ZjQ0MzQ0MDAxNzQyZjQyZSIsImlhdCI6MTYyNjY0MjQ3MiwiZXhwIjoxNjI2NjQ2MDcyfQ.0q7h4ZxY3b0xV0g7l0Z7x0gZ8aQ7mQnY6FZLZy2yY0Q" }
- *                 summary: A successful response
- *       500:
- *         description: Error saving the user
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Error message for saving the user
- *             examples:
- *               failure:
- *                 value: { "message": "Error al guardar el usuario." }
- *                 summary: A failure response
- */
+
 router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, password, type } = req.body;
 
@@ -102,6 +47,282 @@ router.post('/signup', async (req, res) => {
     });
 });
 
+
+router.post('/login', async (req, res) => {
+  // validaciones
+  const { error } = userSchema.validate(req.body.email, req.body.password);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+  //Buscando el user por su dirección de email
+  const user = await userSchema.findOne({ email: req.body.email });
+  //validando si no se encuentra
+  if (!user) return res.status(400).json({ message: 'user no encontrado' });
+  //Transformando la contraseña a su valor original para
+  //compararla con la pass que se ingresa en el inicio de sesión
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+
+  if (!validPassword)
+    return res.status(400).json({ message: 'password no válida' });
+
+  const token = jwt.sign({ user: user }, process.env.SECRET, {
+    expiresIn: 60 * 60,
+  });
+
+  res.json({
+    error: null,
+    message: 'Bienvenido(a)',
+    token,
+  });
+});
+//conseguir todos los ususarios
+
+
+router.get('/user', auth, async (req, res) => {
+  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
+  try {
+    const user = await userSchema.findById(req.userData.user._id); //Este es el user que esta haciendo la petición, con el cual esta el Token
+    console.log(user.type);
+    if (user) {
+      if (user.type === 'Admin') {
+        const users = await userSchema.find();
+        res.json({
+          user: user.type,
+          users,
+        });
+      } else {
+        res.json({
+          user: user.type,
+        });
+      }
+    } else {
+      //El token no es válido o el usuario no existe
+      res.status(401).json({
+        message: 'No tienes permiso para acceder a este endpoint.',
+      });
+    }
+  } catch (error) {
+    //Ocurrió un error al consultar la base de datos
+    console.error(error);
+    res.status(500).json({
+      message: 'Error al obtener los usuarios.',
+    });
+  }
+});
+
+
+router.get('/user/:id', auth, async (req, res) => {
+  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
+  const userData = await userSchema.findById(req.userData.user._id);
+  try {
+    let user;
+    if (userData.type === 'Admin') {
+      user = await userSchema.findById(req.params.id);
+    } else {
+      user = await userSchema.findById(req.userData.user._id);
+    }
+    if (user) {
+      //El usuario existe y se devuelve con el código de estado 200 y el mensaje de éxito
+      res.status(200).json({
+        message: 'Usuario obtenido con éxito.',
+        user: user,
+      });
+    } else {
+      //El usuario no existe y se devuelve el código de estado 404 y el mensaje de error
+      res.status(404).json({
+        message: 'No se encontró el usuario con el ID especificado.',
+      });
+    }
+  } catch (error) {
+    //Ocurrió un error al consultar la base de datos y se devuelve el código de estado 500 y el mensaje de error
+    console.error(error);
+    res.status(500).json({
+      message: 'Error al obtener el usuario.',
+      error: error.message,
+    });
+  }
+});
+
+
+// actualiza un usuario, si es admin puede actualizar a todos, si es otro solo se puede actualizar asi mismo
+router.put('/user/:id', auth, async function updateUser(req, res) {
+  const { firstName, lastName, email, password, newPassword, type } = req.body;
+
+  const user = await userSchema.findById(req.userData.user._id);
+  if (user) {
+    console.log(password, newPassword);
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res
+        .status(400)
+        .json({ message: 'La contraseña ingresada no es válida' });
+    }
+
+    if (user.type === 'Admin') {
+      const user1 = await userSchema.findById(req.params.id); // find the user by id
+      if (user1) {
+        user1.firstName = firstName;
+        user1.lastName = lastName;
+        user1.email = email;
+        user1.password = await user1.encryptpass(newPassword);
+        user1.type = type;
+        await user1.save(); //save the updated user
+
+        res.status(200).json({
+          message: 'Usuario actualizado exitosamente.',
+        });
+      } else {
+        res.status(404).json({
+          message: 'Usuario no encontrado.',
+        });
+      }
+    } else if (user.id === req.params.id) {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.email = email;
+      user.password = await user.encryptpass(newPassword);
+      user.type = type;
+      await user.save(); //save the updated user
+      res.status(200).json({
+        message: 'Usuario actualizado exitosamente.',
+      });
+    } else {
+      res.status(401).json({
+        message: 'No tienes permiso para acceder a este endpoint.',
+      });
+    }
+  } else {
+    //El token no es válido o el usuario no existe
+    res.status(401).json({
+      message: 'No tienes permiso para acceder a este endpoint.',
+    });
+  }
+});
+
+
+// Eliminar un usuario
+router.delete('/user/:id', auth, async (req, res) => {
+  const user = await userSchema.findById(req.userData.user._id);
+
+  if (user) {
+    if (user.type === 'Admin') {
+      await userSchema
+        .findByIdAndDelete(req.params.id)
+        .then(() => {
+          res.json({
+            message: 'Usuario eliminado exitosamente.',
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            error: 'Error al eliminar el usuario.',
+          });
+        });
+    } else if (user.id === req.params.id) {
+      await userSchema
+        .findByIdAndDelete(req.params.id)
+        .then(() => {
+          res.json({
+            message: 'Usuario eliminado exitosamente.',
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            error: 'Error al eliminar el usuario.',
+          });
+        });
+    } else {
+      res.status(401).json({
+        message: 'No tienes permiso para acceder a este endpoint.',
+      });
+    }
+  } else {
+    res.status(401).json({
+      message: 'No tienes permiso para acceder a este endpoint.',
+    });
+  }
+});
+
+router.get('/verify', async (req, res) => {
+  const token = req.headers.authorization.split(' ')[1] || '';
+  if (!token) return res.send(false);
+
+  jwt.verify(token, process.env.SECRET, async (error, user) => {
+    if (error) return res.status(401).json({ error: 'Token no válido' });
+
+    const userFound = await userSchema.findById(user.user._id);
+    if (!userFound) return res.status(401).json({ error: 'Usuario no válido' });
+
+    return res.json({
+      id: userFound._id,
+      firstName: userFound.firstName,
+      lastName: userFound.lastName,
+      email: userFound.email,
+      type: userFound.type,
+    });
+  });
+});
+
+router.get('/logout', (req, res) => {
+  res.status(200).send({ auth: false, token: null });
+});
+
+module.exports = router;
+/**
+ * @swagger
+ * /api/signup:
+ *   post:
+ *     summary: Endpoint for signing up a new user
+ *     description: This endpoint creates a new user in the database and returns a JSON Web Token (JWT) for authentication. The request body must contain the user's first name, last name, email, password, and type (admin or regular).
+ *     tags: [User]
+ *     security:
+ *       - jwt: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             $ref: '#/components/schemas/User'
+ *           examples:
+ *             valid:
+ *               value: { "firstName": "John", "lastName": "Doe", "email": "john.doe@example.com", "password": "123456", "type": "Comprador" }
+ *               summary: A valid request
+ *             invalid:
+ *               value: { "firstName": "John", "lastName": "Doe", "email": "john.doe@example.com", "password": "123456" }
+ *               summary: An invalid request (missing type)
+ *     responses:
+ *       201:
+ *         description: User successfully created and assigned a token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 auth:
+ *                   type: boolean
+ *                   description: A flag indicating if the authentication was successful
+ *                 token:
+ *                   type: string
+ *                   description: The JWT for the user
+ *             examples:
+ *               success:
+ *                 value: { "auth": true}
+ *                 summary: A successful response
+ *       500:
+ *         description: Error saving the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message for saving the user
+ *             examples:
+ *               failure:
+ *                 value: { "message": "Error al guardar el usuario." }
+ *                 summary: A failure response
+ */
 /**
  * @swagger
  * /api/login:
@@ -171,33 +392,6 @@ router.post('/signup', async (req, res) => {
  *                 value: { "error": "password no válida" }
  *                 summary: An invalid password
  */
-router.post('/login', async (req, res) => {
-  // validaciones
-  const { error } = userSchema.validate(req.body.email, req.body.password);
-  if (error) return res.status(400).json({ message: error.details[0].message });
-  //Buscando el user por su dirección de email
-  const user = await userSchema.findOne({ email: req.body.email });
-  //validando si no se encuentra
-  if (!user) return res.status(400).json({ message: 'user no encontrado' });
-  //Transformando la contraseña a su valor original para
-  //compararla con la pass que se ingresa en el inicio de sesión
-  const validPassword = await bcrypt.compare(req.body.password, user.password);
-
-  if (!validPassword)
-    return res.status(400).json({ message: 'password no válida' });
-
-  const token = jwt.sign({ user: user }, process.env.SECRET, {
-    expiresIn: 60 * 60,
-  });
-
-  res.json({
-    error: null,
-    message: 'Bienvenido(a)',
-    token,
-  });
-});
-//conseguir todos los ususarios
-
 /**
  * @swagger
  * /api/user:
@@ -205,8 +399,12 @@ router.post('/login', async (req, res) => {
  *     summary: Get all users
  *     description: This endpoint returns a list of all users in the database. If the user is an admin, they can see all the users' details. If the user is a regular user, they can only see their own type. The endpoint requires a valid JSON Web Token (JWT) for authentication.
  *     tags: [User]
- *     security:
- *       - jwt: []
+ *     parameters:
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
  *     responses:
  *       200:
  *         description: Successfully retrieved users
@@ -248,39 +446,6 @@ router.post('/login', async (req, res) => {
  *             example:
  *               message: Error al obtener los usuarios.
  */
-//conseguir todos los ususarios
-router.get('/user', auth, async (req, res) => {
-  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
-  try {
-    const user = await userSchema.findById(req.userData.user._id); //Este es el user que esta haciendo la petición, con el cual esta el Token
-    console.log(user.type);
-    if (user) {
-      if (user.type === 'Admin') {
-        const users = await userSchema.find();
-        res.json({
-          user: user.type,
-          users,
-        });
-      } else {
-        res.json({
-          user: user.type,
-        });
-      }
-    } else {
-      //El token no es válido o el usuario no existe
-      res.status(401).json({
-        message: 'No tienes permiso para acceder a este endpoint.',
-      });
-    }
-  } catch (error) {
-    //Ocurrió un error al consultar la base de datos
-    console.error(error);
-    res.status(500).json({
-      message: 'Error al obtener los usuarios.',
-    });
-  }
-});
-
 /**
  * @swagger
  * /api/user/{id}:
@@ -297,6 +462,11 @@ router.get('/user', auth, async (req, res) => {
  *         schema:
  *           type: string
  *         required: true
+ *       - name: Authorization
+ *         in: header
+ *         description: The JWT token for authentication
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: Successfully retrieved user
@@ -341,39 +511,6 @@ router.get('/user', auth, async (req, res) => {
  *             example:
  *               error: Error al obtener el usuario.
  */
-//conseguir un usuario
-router.get('/user/:id', auth, async (req, res) => {
-  //auth es un middleware que verifica si el token es válido y guarda los datos del usuario en req.userData
-  const userData = await userSchema.findById(req.userData.user._id);
-  try {
-    let user;
-    if (userData.type === 'Admin') {
-      user = await userSchema.findById(req.params.id);
-    } else {
-      user = await userSchema.findById(req.userData.user._id);
-    }
-    if (user) {
-      //El usuario existe y se devuelve con el código de estado 200 y el mensaje de éxito
-      res.status(200).json({
-        message: 'Usuario obtenido con éxito.',
-        user: user,
-      });
-    } else {
-      //El usuario no existe y se devuelve el código de estado 404 y el mensaje de error
-      res.status(404).json({
-        message: 'No se encontró el usuario con el ID especificado.',
-      });
-    }
-  } catch (error) {
-    //Ocurrió un error al consultar la base de datos y se devuelve el código de estado 500 y el mensaje de error
-    console.error(error);
-    res.status(500).json({
-      message: 'Error al obtener el usuario.',
-      error: error.message,
-    });
-  }
-});
-
 /**
  * @swagger
  * /api/user/{id}:
@@ -453,62 +590,6 @@ router.get('/user/:id', auth, async (req, res) => {
  *             example:
  *               error: Error al actualizar el usuario.
  */
-// actualiza un usuario, si es admin puede actualizar a todos, si es otro solo se puede actualizar asi mismo
-router.put('/user/:id', auth, async function updateUser(req, res) {
-  const { firstName, lastName, email, password, newPassword, type } = req.body;
-
-  const user = await userSchema.findById(req.userData.user._id);
-  if (user) {
-    console.log(password, newPassword);
-    const validPassword = await bcrypt.compare(password, user.password);
-
-    if (!validPassword) {
-      return res
-        .status(400)
-        .json({ message: 'La contraseña ingresada no es válida' });
-    }
-
-    if (user.type === 'Admin') {
-      const user1 = await userSchema.findById(req.params.id); // find the user by id
-      if (user1) {
-        user1.firstName = firstName;
-        user1.lastName = lastName;
-        user1.email = email;
-        user1.password = await user1.encryptpass(newPassword);
-        user1.type = type;
-        await user1.save(); //save the updated user
-
-        res.status(200).json({
-          message: 'Usuario actualizado exitosamente.',
-        });
-      } else {
-        res.status(404).json({
-          message: 'Usuario no encontrado.',
-        });
-      }
-    } else if (user.id === req.params.id) {
-      user.firstName = firstName;
-      user.lastName = lastName;
-      user.email = email;
-      user.password = await user.encryptpass(newPassword);
-      user.type = type;
-      await user.save(); //save the updated user
-      res.status(200).json({
-        message: 'Usuario actualizado exitosamente.',
-      });
-    } else {
-      res.status(401).json({
-        message: 'No tienes permiso para acceder a este endpoint.',
-      });
-    }
-  } else {
-    //El token no es válido o el usuario no existe
-    res.status(401).json({
-      message: 'No tienes permiso para acceder a este endpoint.',
-    });
-  }
-});
-
 /**
  * @swagger
  * /api/user/{id}:
@@ -563,71 +644,3 @@ router.put('/user/:id', auth, async function updateUser(req, res) {
  *             example:
  *               error: Error al eliminar el usuario.
  */
-// Eliminar un usuario
-router.delete('/user/:id', auth, async (req, res) => {
-  const user = await userSchema.findById(req.userData.user._id);
-
-  if (user) {
-    if (user.type === 'Admin') {
-      await userSchema
-        .findByIdAndDelete(req.params.id)
-        .then(() => {
-          res.json({
-            message: 'Usuario eliminado exitosamente.',
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            error: 'Error al eliminar el usuario.',
-          });
-        });
-    } else if (user.id === req.params.id) {
-      await userSchema
-        .findByIdAndDelete(req.params.id)
-        .then(() => {
-          res.json({
-            message: 'Usuario eliminado exitosamente.',
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            error: 'Error al eliminar el usuario.',
-          });
-        });
-    } else {
-      res.status(401).json({
-        message: 'No tienes permiso para acceder a este endpoint.',
-      });
-    }
-  } else {
-    res.status(401).json({
-      message: 'No tienes permiso para acceder a este endpoint.',
-    });
-  }
-});
-
-router.get('/verify', async (req, res) => {
-  const token = req.headers.authorization.split(' ')[1] || '';
-  if (!token) return res.send(false);
-
-  jwt.verify(token, process.env.SECRET, async (error, user) => {
-    if (error) return res.status(401).json({ error: 'Token no válido' });
-
-    const userFound = await userSchema.findById(user.user._id);
-    if (!userFound) return res.status(401).json({ error: 'Usuario no válido' });
-
-    return res.json({
-      id: userFound._id,
-      firstName: userFound.firstName,
-      lastName: userFound.lastName,
-      email: userFound.email,
-      type: userFound.type,
-    });
-  });
-});
-
-router.get('/logout', (req, res) => {
-  res.status(200).send({ auth: false, token: null });
-});
-
-module.exports = router;
