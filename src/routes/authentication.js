@@ -253,7 +253,7 @@ router.get('/verify', async (req, res) => {
     if (!userFound) return res.status(401).json({ error: 'Usuario no válido' });
 
     return res.json({
-      id: userFound._id,
+      _id: userFound._id,
       firstName: userFound.firstName,
       lastName: userFound.lastName,
       email: userFound.email,
