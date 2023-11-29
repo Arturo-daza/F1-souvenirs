@@ -11,17 +11,19 @@ router.post('/review', auth, async (req, res) => {
   const review = new reviewSchema({ user, product, rating, comment });
   const userExists = await userSchema.findById(user);
   const productExists = await roductSchema.findById(product);
-  if (!userExists) return res.status(400).send('Usuario no existe');
-  if (!productExists) return res.status(400).send('Producto no existe');
+  if (!userExists) return res.status(400).json({ message: 'Usuario no existe'});
+  if (!productExists) return res.status(400).json({ message: 'Producto no existe'});
   //genera una validación de que el comentario es unico por cada usuario al producto
   const reviewExists = await reviewSchema.findOne({ user, product });
   if (reviewExists)
-    return res.status(400).send('Ya existe una revisión para este producto');
+    return res
+      .status(400)
+      .json({ message: 'Ya existe una revisión para este producto' });
   try {
     const savedReview = await review.save();
-    res.status(201).send(savedReview);
+    res.status(201).json(savedReview);
   } catch (error) {
-    res.status(500).send('Error interno del servidor');
+    res.status(500).json('Error interno del servidor');
   }
 });
 
@@ -31,7 +33,7 @@ router.get('/review', async (req, res) => {
     .find()
     .populate('user', 'user')
     .populate('product', 'nombre');
-  res.send(review);
+  res.json({ message: review});
 });
 
 // Endpoint para obtener una revisión por id
