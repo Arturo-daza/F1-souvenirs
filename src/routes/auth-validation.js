@@ -7,6 +7,7 @@ const auth = (req, res, next) => {
     return res
       .status(401)
       .json({ error: '¡Lo sentimos!, no puedes acceder a esta ruta' });
+
   try {
     const decoded = jwt.verify(token, process.env.SECRET);
     req.userData = decoded;
@@ -15,4 +16,5 @@ const auth = (req, res, next) => {
     res.status(500).json({ error: 'El token no es valido' });
   }
 };
+
 module.exports = auth;
