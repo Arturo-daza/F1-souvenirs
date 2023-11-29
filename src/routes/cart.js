@@ -128,3 +128,232 @@ router.delete('/cart/:id', auth, async (req, res) => {
   }
 });
 module.exports = router;
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/add:
+ *     post:
+ *       tags: [Cart]
+ *       summary: Add a product to the user's cart
+ *       parameters:
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   type: string
+ *                   description: The ID of the product to add to the cart
+ *                 quantity:
+ *                   type: integer
+ *                   description: The quantity of the product to add
+ *                   minimum: 1
+ *               required:
+ *                 - product
+ *                 - quantity
+ *       responses:
+ *         '200':
+ *           description: Product added to the cart successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Cart'
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired
+ *         '404':
+ *           description: Product not found
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/user:
+ *     get:
+ *       tags: [Cart]
+ *       summary: Get the cart of the logged-in user
+ *       parameters:
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the user's cart
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Cart'
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/{userId}:
+ *     get:
+ *       tags: [Cart]
+ *       summary: Get the shopping cart of a user
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           description: ID of the user whose cart to retrieve
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the user's shopping cart
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Cart'
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired, or the user does not have the required permissions
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/{userId}/{itemId}:
+ *     put:
+ *       tags: [Cart]
+ *       summary: Update the quantity of a product in the user's shopping cart
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           description: ID of the user whose cart to update
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: path
+ *           name: itemId
+ *           description: ID of the cart item to update
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 quantity:
+ *                   type: integer
+ *                   description: The updated quantity of the product in the cart
+ *                   minimum: 1
+ *               required:
+ *                 - quantity
+ *       responses:
+ *         '200':
+ *           description: Quantity of the product in the cart updated successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Cart'
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/{userId}/{productId}:
+ *     delete:
+ *       tags: [Cart]
+ *       summary: Delete a product from the user's shopping cart
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           description: ID of the user whose cart to update
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: path
+ *           name: productId
+ *           description: ID of the product to remove from the cart
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Product removed from the cart successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Cart'
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/cart/{id}:
+ *     delete:
+ *       tags: [Cart]
+ *       summary: Delete a shopping cart
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the shopping cart to delete
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Shopping cart deleted successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *         '401':
+ *           description: Unauthorized - The provided JWT token is invalid or expired
+ *         '500':
+ *           description: Internal server error
+ */

@@ -87,3 +87,212 @@ router.get('/review/product/:id', async (req, res) => {
 });
 
 module.exports = router;
+/**
+ * @swagger
+ * paths:
+ *   /api/review:
+ *     post:
+ *       tags: [Review]
+ *       summary: Create a new review with user and product validation
+ *       parameters:
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: string
+ *                   description: The ID of the user who created the review
+ *                 product:
+ *                   type: string
+ *                   description: The ID of the product being reviewed
+ *                 rating:
+ *                   type: number
+ *                   description: The rating given by the user (1-5)
+ *                 comment:
+ *                   type: string
+ *                   description: The comment or review text
+ *               required:
+ *                 - user
+ *                 - product
+ *                 - rating
+ *                 - comment
+ *       responses:
+ *         '201':
+ *           description: Review created successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Review'
+ *         '400':
+ *           description: Bad request - User or Product does not exist, or a review already exists for the user and product
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/review:
+ *     get:
+ *       tags: [Review]
+ *       summary: Get all reviews
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved all reviews
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Review'
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/review/{id}:
+ *     get:
+ *       tags: [Review]
+ *       summary: Get a review by ID
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the review to retrieve
+ *           required: true
+ *           schema:
+ *             type: string
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the review
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Review'
+ *         '404':
+ *           description: Review not found
+ *         '500':
+ *           description: Internal server error
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /api/review/{id}:
+ *     put:
+ *       tags: [Review]
+ *       summary: Update a review by ID
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the review to update
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: string
+ *                   description: The ID of the user who created the review
+ *                 product:
+ *                   type: string
+ *                   description: The ID of the product being reviewed
+ *                 rating:
+ *                   type: number
+ *                   description: The rating given by the user (1-5)
+ *                 comment:
+ *                   type: string
+ *                   description: The comment or review text
+ *               required:
+ *                 - user
+ *                 - product
+ *                 - rating
+ *                 - comment
+ *       responses:
+ *         '204':
+ *           description: Review updated successfully
+ *         '404':
+ *           description: Review not found
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/review/{id}:
+ *     delete:
+ *       tags: [Review]
+ *       summary: Delete a review by ID
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           description: ID of the review to delete
+ *           required: true
+ *           schema:
+ *             type: string
+ *         - in: header
+ *           name: Authorization
+ *           description: The JWT token for authentication
+ *           required: true
+ *           type: string
+ *       responses:
+ *         '200':
+ *           description: Review deleted successfully
+ *         '404':
+ *           description: Review not found
+ *         '500':
+ *           description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/product/{productId}/averageRating:
+ *     get:
+ *       tags: [Product]
+ *       summary: Get the average rating for a product
+ *       parameters:
+ *         - in: path
+ *           name: productId
+ *           description: ID of the product to calculate the average rating
+ *           required: true
+ *           schema:
+ *             type: string
+ *       responses:
+ *         '200':
+ *           description: Successfully retrieved the average rating
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   averageRating:
+ *                     type: number
+ *         '404':
+ *           description: No reviews found for the specified product
+ *         '500':
+ *           description: Internal server error
+ */
